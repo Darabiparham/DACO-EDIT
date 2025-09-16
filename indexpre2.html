@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>افزودن متن به عکس</title>
+  <style>
+    body {
+      font-family: 'Vazirmatn', sans-serif;
+      text-align: center;
+      direction: rtl;
+      background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .container {
+      background: white;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      max-width: 800px;
+      width: 100%;
+    }
+    canvas {
+      border: 2px solid #ddd;
+      margin-top: 20px;
+      max-width: 100%;
+      border-radius: 10px;
+      touch-action: none;
+    }
+    input, button {
+      margin: 10px;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+      transition: all 0.3s ease;
+    }
+    input:focus, button:hover {
+      border-color: #6200ea;
+      outline: none;
+      box-shadow: 0 0 5px rgba(98, 0, 234, 0.3);
+    }
+    button {
+      background: #6200ea;
+      color: white;
+      cursor: pointer;
+      border: none;
+    }
+    button:hover {
+      background: #7c4dff;
+    }
+    .color-picker {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin: 10px 0;
+    }
+    .color-btn {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      border: 1px solid #ccc;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+    .color-btn:hover {
+      transform: scale(1.2);
+    }
+    .font-size-panel {
+      margin: 10px 0;
+    }
+    .direction-controls {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin: 10px 0;
+    }
+    .direction-btn {
+      width: 40px;
+      height: 40px;
+      font-size: 18px;
+    }
+    .resize-handle {
+      position: absolute;
+      width: 15px;
+      height: 15px;
+      background: #6200ea;
+      border-radius: 50%;
+      cursor: se-resize;
+      bottom: -7px;
+      right: -7px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>اضافه کردن متن فارسی روی عکس</h2>
+    <input type="file" id="imageInput" accept="image/*"><br>
+    <input type="file" id="fontInput" accept=".ttf,.otf"><br>
+    <input type="text" id="textInput" placeholder="متن خودت رو بنویس"><br>
+    <div class="font-size-panel">
+      <label for="fontSizeInput">سایز فونت (۱ تا ۱۰۰۰):</label>
+      <input type="number" id="fontSizeInput" min="1" max="1000" value="50">
+    </div>
+    <div class="color-picker">
+      <button class="color-btn" style="background: #000000" data-color="#000000"></button>
+      <button class="color-btn" style="background: #ffffff; border: 1px solid #999" data-color="#ffffff"></button>
+      <button class="color-btn" style="background: #ff0000" data-color="#ff0000"></button>
+      <button class="color-btn" style="background: #00ff00" data-color="#00ff00"></button>
+      <button class="color-btn" style="background: #0000ff" data-color="#0000ff"></button>
+    </div>
+    <div class="direction-controls">
+      <button class="direction-btn" id="moveUp">↑</button>
+      <button class="direction-btn" id="moveDown">↓</button>
+      <button class="direction-btn" id="moveLeft">→</button>
+      <button class="direction-btn" id="moveRight">←</button>
+    </div>
+    <button id="downloadBtn">دانلود عکس</button>
+    <button id="downloadTextBtn">دانلود متن (PNG)</button>
+    <canvas id="canvas"></canvas>
+  </div>
+
+  <script>
+    const imageInput = document.getElementById('imageInput');
+    const fontInput = document.getElementById('fontInput');
+    const textInput = document.getElementById('textInput');
+    const fontSizeInput = document.getElementById('fontSizeInput');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const downloadTextBtn = document.getElementById('downloadTextBtn');
+    const moveUp = document.getElementById('moveUp');
+    const moveDown = document.getElementById('moveDown');
+    const moveLeft = document.getElementById('moveLeft');
+    const moveRight = document.getElementById('moveRight');
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const colorButtons = document.querySelectorAll('.color-btn');
+
+    let img = null;
+    let customFont = null;
+    let fontSize = 50;
+    let textColor = '#000000';
+    let isDragging = false;
+    let isResizing = false;
+    let textBox = { x: 0, y: 0, width: 200, height: 60 };
+    let dragStartX = 0;
+    let dragStartY = 0;
+
+    // لود فونت Vazir
+    const link = document.createElement('link');
+    link.href = 'https://fonts.googleapis.com/css2?family=Vazirmatn&display=swap';
+    link.rel = 'stylesheet';
+    document.head.appendChild(link);
+
+    // لود تصویر
+    imageInput.addEventListener('change', e => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = ev => {
+        img = new Image();
+        img.onload = () => {
+          canvas.width = img.width;
+          canvas.height = img.height;
+          updateTextBoxSize();
+          centerTextBox();
+          drawCanvas();
+        };
+        img.src = ev.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    // لود فونت
+    fontInput.addEventListener('change', e => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = ev => {
+        const font = new FontFace("CustomFont", ev.target.result);
+        font.load().then(f => {
+          document.fonts.add(f);
+          customFont = "CustomFont";
+          alert("فونت بارگذاری شد!");
+          drawCanvas();
+        });
+      };
+      reader.readAsArrayBuffer(file);
+    });
+
+    // انتخاب رنگ
+    colorButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        textColor = btn.dataset.color;
+        drawCanvas();
+      });
+    });
+
+    // تغییر متن
+    textInput.addEventListener('input', () => {
+      updateTextBoxSize();
+      centerTextBox();
+      drawCanvas();
+    });
+
+    // تنظیم سایز فونت دستی
+    fontSizeInput.addEventListener('input', () => {
+      fontSize = Math.min(parseInt(fontSizeInput.value) || 50, Math.min(canvas.width, canvas.height) * 0.8);
+      fontSize = Math.max(fontSize, 10);
+      fontSizeInput.value = fontSize;
+      updateTextBoxSize();
+      centerTextBox();
+      drawCanvas();
+    });
+
+    // دکمه‌های جهت‌دار
+    moveUp.addEventListener('click', () => {
+      textBox.y = Math.max(0, textBox.y - 5);
+      drawCanvas();
+    });
+    moveDown.addEventListener('click', () => {
+      textBox.y = Math.min(canvas.height - textBox.height, textBox.y + 5);
+      drawCanvas();
+    });
+    moveLeft.addEventListener('click', () => {
+      textBox.x = Math.max(0, textBox.x - 5);
+      drawCanvas();
+    });
+    moveRight.addEventListener('click', () => {
+      textBox.x = Math.min(canvas.width - textBox.width, textBox.x + 5);
+      drawCanvas();
+    });
+
+    // به‌روزرسانی اندازه کادر متن
+    function updateTextBoxSize() {
+      ctx.font = `${fontSize}px ${customFont || "Vazirmatn"}`;
+      textBox.width = Math.max(100, ctx.measureText(textInput.value || "متن").width + 20);
+      textBox.height = fontSize * 1.2;
+      // محدود کردن کادر به داخل تصویر
+      textBox.x = Math.max(0, Math.min(textBox.x, canvas.width - textBox.width));
+      textBox.y = Math.max(0, Math.min(textBox.y, canvas.height - textBox.height));
+    }
+
+    // قرار دادن متن در وسط تصویر
+    function centerTextBox() {
+      if (!img) return;
+      textBox.x = (canvas.width - textBox.width) / 2;
+      textBox.y = (canvas.height - textBox.height) / 2;
+    }
+
+    // رسم محتوا
+    function drawCanvas() {
+      if (!img) return;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0);
+
+      // رسم مربع دور متن
+      ctx.strokeStyle = '#6200ea';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(textBox.x, textBox.y, textBox.width, textBox.height);
+
+      // رسم متن
+      ctx.font = `${fontSize}px ${customFont || "Vazirmatn"}`;
+      ctx.fillStyle = textColor;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(textInput.value || "متن نمونه", textBox.x + textBox.width / 2, textBox.y + textBox.height / 2);
+
+      // رسم دستگیره تغییر اندازه
+      ctx.fillStyle = '#6200ea';
+      ctx.beginPath();
+      ctx.arc(textBox.x + textBox.width, textBox.y + textBox.height, 8, 0, 2 * Math.PI);
+      ctx.fill();
+    }
+
+    // رویدادهای ماوس و لمس
+    function handleStart(e) {
+      e.preventDefault();
+      const rect = canvas.getBoundingClientRect();
+      const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+      const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+      const mouseX = clientX - rect.left;
+      const mouseY = clientY - rect.top;
+      const handleX = textBox.x + textBox.width;
+      const handleY = textBox.y + textBox.height;
+
+      // چک کردن کلیک روی دستگیره تغییر اندازه
+      if (Math.hypot(mouseX - handleX, mouseY - handleY) < 20) {
+        isResizing = true;
+      }
+      // چک کردن کلیک داخل مربع برای جابه‌جایی
+      else if (
+        mouseX >= textBox.x &&
+        mouseX <= textBox.x + textBox.width &&
+        mouseY >= textBox.y &&
+        mouseY <= textBox.y + textBox.height
+      ) {
+        isDragging = true;
+        dragStartX = mouseX - textBox.x;
+        dragStartY = mouseY - textBox.y;
+      }
+    }
+
+    function handleMove(e) {
+      e.preventDefault();
+      const rect = canvas.getBoundingClientRect();
+      const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+      const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+      const mouseX = clientX - rect.left;
+      const mouseY = clientY - rect.top;
+
+      if (isResizing) {
+        // تغییر اندازه
+        textBox.width = Math.max(100, mouseX - textBox.x);
+        textBox.height = Math.max(30, mouseY - textBox.y);
+        fontSize = Math.max(10, Math.min(textBox.height * 0.8, Math.min(canvas.width, canvas.height) * 0.8));
+        fontSizeInput.value = Math.round(fontSize);
+        drawCanvas();
+      } else if (isDragging) {
+        // جابه‌جایی
+        textBox.x = Math.max(0, Math.min(mouseX - dragStartX, canvas.width - textBox.width));
+        textBox.y = Math.max(0, Math.min(mouseY - dragStartY, canvas.height - textBox.height));
+        drawCanvas();
+      }
+    }
+
+    function handleEnd() {
+      isDragging = false;
+      isResizing = false;
+    }
+
+    canvas.addEventListener('mousedown', handleStart);
+    canvas.addEventListener('mousemove', handleMove);
+    canvas.addEventListener('mouseup', handleEnd);
+    canvas.addEventListener('mouseout', handleEnd);
+    canvas.addEventListener('touchstart', handleStart);
+    canvas.addEventListener('touchmove', handleMove);
+    canvas.addEventListener('touchend', handleEnd);
+
+    // دانلود عکس
+    downloadBtn.addEventListener('click', () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0);
+      ctx.font = `${fontSize}px ${customFont || "Vazirmatn"}`;
+      ctx.fillStyle = textColor;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(textInput.value || "متن نمونه", textBox.x + textBox.width / 2, textBox.y + textBox.height / 2);
+
+      const link = document.createElement('a');
+      link.download = 'image_with_text.png';
+      link.href = canvas.toDataURL();
+      link.click();
+      drawCanvas();
+    });
+
+    // دانلود متن به‌صورت PNG
+    downloadTextBtn.addEventListener('click', () => {
+      const tempCanvas = document.createElement('canvas');
+      const tempCtx = tempCanvas.getContext('2d');
+      tempCanvas.width = textBox.width;
+      tempCanvas.height = textBox.height;
+      tempCtx.font = `${fontSize}px ${customFont || "Vazirmatn"}`;
+      tempCtx.fillStyle = textColor;
+      tempCtx.textAlign = "center";
+      tempCtx.textBaseline = "middle";
+      tempCtx.fillText(textInput.value || "متن نمونه", textBox.width / 2, textBox.height / 2);
+
+      const link = document.createElement('a');
+      link.download = 'text_only.png';
+      link.href = tempCanvas.toDataURL('image/png');
+      link.click();
+    });
+  </script>
+</body>
+</html>
