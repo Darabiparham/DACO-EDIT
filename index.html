@@ -136,7 +136,7 @@
         .lang-switch {
             position: relative;
             display: inline-block;
-            width: 50px;
+            width: 60px;
             height: 28px;
         }
         
@@ -155,16 +155,17 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0 6px;
+            padding: 0 8px;
             color: var(--text-color-light);
-            font-size: 0.8rem;
+            font-size: 0.75rem;
+            font-weight: 600;
         }
         
         .lang-slider:before {
             position: absolute;
             content: "";
             height: 20px;
-            width: 20px;
+            width: 24px;
             left: 4px;
             bottom: 4px;
             background-color: var(--orange-main);
@@ -173,7 +174,7 @@
         }
 
         input:checked + .lang-slider:before {
-            transform: translateX(18px);
+            transform: translateX(28px);
             background-color: var(--green-main);
         }
 
@@ -211,6 +212,42 @@
             cursor: grabbing;
         }
         
+        /* Guide Lines */
+        .guide-lines {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 15;
+        }
+
+        .guide-line {
+            position: absolute;
+            background: var(--orange-main);
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .guide-line.vertical {
+            width: 2px;
+            height: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .guide-line.horizontal {
+            height: 2px;
+            width: 100%;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .guide-line.active {
+            opacity: 0.8;
+        }
+        
         /* New: Big Plus Icon Placeholder */
         #photo-placeholder {
             position: absolute;
@@ -229,19 +266,45 @@
             transition: opacity 0.3s;
         }
         
-        /* New: Edit Frame for Text */
-        #edit-frame {
+        /* Text selection frames */
+        .text-frame {
             position: absolute;
-            top: 0;
-            left: 0;
             border: 2px dashed var(--orange-main);
             border-radius: 5px;
-            pointer-events: none; /* Allows clicks to pass through to the canvas */
+            pointer-events: none;
             z-index: 5;
             opacity: 0;
             transition: opacity 0.4s ease-out;
         }
 
+        .text-frame.active {
+            opacity: 1;
+            border-color: var(--green-main);
+        }
+
+        /* Resize handles */
+        .resize-handle {
+            position: absolute;
+            background: var(--orange-main);
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2px solid white;
+            cursor: pointer;
+            z-index: 20;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .canvas-wrapper:hover .resize-handle,
+        .canvas-wrapper.resizing .resize-handle {
+            opacity: 1;
+        }
+
+        .resize-handle.nw { top: -6px; left: -6px; cursor: nw-resize; }
+        .resize-handle.ne { top: -6px; right: -6px; cursor: ne-resize; }
+        .resize-handle.sw { bottom: -6px; left: -6px; cursor: sw-resize; }
+        .resize-handle.se { bottom: -6px; right: -6px; cursor: se-resize; }
 
         canvas {
             display: block;
@@ -252,18 +315,26 @@
             touch-action: none;
         }
 
-        /* Footer with Accordion Controls */
+        /* Footer with Accordion Controls - Modern Glass Effect */
         .footer-controls {
-            background: var(--panel-bg-light);
-            backdrop-filter: blur(10px);
-            border-top: 1px solid var(--border-color-light);
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
             padding: 12px 16px;
-            transition: border 0.5s ease;
+            transition: all 0.5s ease;
             position: fixed;
             bottom: 0;
             left: 0;
             right: 0;
             z-index: 2000;
+            box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .night-mode .footer-controls {
+            background: rgba(27, 59, 20, 0.2);
+            border-top: 1px solid rgba(245, 230, 211, 0.2);
+            box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.3);
         }
 
         .control-icons {
@@ -288,9 +359,17 @@
         }
 
         .control-icon:hover, .control-icon.active {
-            background: var(--orange-main);
+            background: rgba(255, 110, 65, 0.8);
             color: white;
             transform: translateY(-2px);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 20px rgba(255, 110, 65, 0.3);
+        }
+
+        .night-mode .control-icon:hover, 
+        .night-mode .control-icon.active {
+            background: rgba(255, 140, 0, 0.8);
+            box-shadow: 0 4px 20px rgba(255, 140, 0, 0.3);
         }
 
         .control-icon svg {
@@ -310,15 +389,22 @@
             bottom: 80px;
             left: 0;
             right: 0;
-            background: var(--panel-bg-light);
-            backdrop-filter: blur(10px);
-            border-top: 1px solid var(--border-color-light);
-            box-shadow: 0 -4px 20px var(--shadow-color);
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 -4px 32px rgba(0, 0, 0, 0.1);
             transform: translateY(100%);
             transition: transform 0.3s ease;
             z-index: 1000;
             max-height: calc(100vh - 160px);
             overflow-y: auto;
+        }
+
+        .night-mode .accordion-panel {
+            background: rgba(27, 59, 20, 0.2);
+            border-top: 1px solid rgba(245, 230, 211, 0.2);
+            box-shadow: 0 -4px 32px rgba(0, 0, 0, 0.3);
         }
 
         .accordion-panel.active { transform: translateY(0); }
@@ -327,20 +413,29 @@
         .download-options a {
             display: block;
             padding: 14px 20px;
-            background: var(--bg-color-light);
+            background: rgba(255, 255, 255, 0.1);
             margin-bottom: 10px;
             border-radius: 12px;
             text-decoration: none;
             color: var(--text-color-light);
             font-weight: 600;
             text-align: center;
-            border: 2px solid var(--border-color-light);
+            border: 2px solid rgba(255, 255, 255, 0.2);
             transition: all 0.2s ease;
+            backdrop-filter: blur(10px);
         }
+
+        .night-mode .download-options a {
+            background: rgba(27, 59, 20, 0.2);
+            border: 2px solid rgba(27, 59, 20, 0.4);
+        }
+
         .download-options a:hover {
-            background: var(--orange-main);
+            background: rgba(255, 110, 65, 0.8);
             color: white;
             border-color: var(--orange-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(255, 110, 65, 0.3);
         }
 
         .panel-header {
@@ -348,14 +443,19 @@
             justify-content: space-between;
             align-items: center;
             padding: 16px;
-            border-bottom: 1px solid var(--border-color-light);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
             font-weight: 700;
             font-size: 1.1rem;
             position: sticky;
             top: 0;
-            background: var(--panel-bg-light);
+            background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
             z-index: 10;
+        }
+
+        .night-mode .panel-header {
+            background: rgba(27, 59, 20, 0.2);
+            border-bottom: 1px solid rgba(245, 230, 211, 0.2);
         }
 
         .close-panel {
@@ -372,6 +472,93 @@
             display: flex;
             flex-direction: column;
             gap: 16px;
+        }
+
+        /* Font Panel Management */
+        .font-panels-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .font-panel {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            border: 1px dashed rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .font-panel.selected {
+            border-color: var(--green-main);
+            background: rgba(27, 59, 20, 0.2);
+        }
+
+        .night-mode .font-panel {
+            background: rgba(27, 59, 20, 0.2);
+            border: 1px dashed rgba(245, 230, 211, 0.3);
+        }
+
+        .font-panel input[type="text"] {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: var(--text-color-light);
+            font-size: 1rem;
+            padding: 8px;
+        }
+
+        .font-panel input[type="text"]::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .night-mode .font-panel input[type="text"]::placeholder {
+            color: rgba(245, 230, 211, 0.5);
+        }
+
+        .font-panel .remove-font {
+            background: none;
+            color: white;
+            border: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 16px;
+            line-height: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .add-font-panel-btn {
+            background: rgba(255, 110, 65, 0.8);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .add-font-panel-btn:hover {
+            background: rgba(255, 110, 65, 1);
+            transform: translateY(-2px);
+        }
+
+        .add-font-panel-btn:disabled {
+            background: rgba(128, 128, 128, 0.5);
+            cursor: not-allowed;
+            transform: none;
         }
 
         /* Color Picker Styles */
@@ -414,11 +601,23 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 12px;
-            font-weight: bold;
-            color: var(--text-color-light);
             background: linear-gradient(45deg, red, yellow, lime, cyan, blue, magenta, red);
             transition: transform 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .rgb-trigger::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 6px;
+            height: 6px;
+            background: var(--current-color, #000000);
+            border-radius: 50%;
+            border: 1px solid white;
         }
 
         .rgb-trigger:hover {
@@ -430,15 +629,21 @@
             top: 45px;
             left: 50%;
             transform: translateX(-50%);
-            background: var(--panel-bg-light);
-            border: 1px solid var(--border-color-light);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 8px;
             padding: 10px;
-            box-shadow: 0 4px 15px var(--shadow-color);
+            box-shadow: 0 4px 32px rgba(0, 0, 0, 0.2);
             z-index: 100;
             opacity: 0;
             visibility: hidden;
             transition: opacity 0.3s, visibility 0.3s;
+        }
+
+        .night-mode .rgb-wheel {
+            background: rgba(27, 59, 20, 0.95);
+            border: 1px solid rgba(245, 230, 211, 0.2);
         }
 
         .rgb-wheel.active {
@@ -454,19 +659,57 @@
             cursor: pointer;
         }
 
+        /* Color Picker for Background */
+        .rgb-bg-trigger {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 2px solid var(--border-color-light);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(45deg, red, yellow, lime, cyan, blue, magenta, red);
+            transition: transform 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .rgb-bg-trigger::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 6px;
+            height: 6px;
+            background: var(--current-bg-color, #000000);
+            border-radius: 50%;
+            border: 1px solid white;
+        }
+
         /* Input & Button Styles */
         input[type="file"] { display: none; }
         
         textarea, input[type="number"], select, button {
             padding: 12px 16px;
             border-radius: 12px;
-            border: 2px solid var(--border-color-light);
+            border: 2px solid rgba(255, 255, 255, 0.2);
             font-size: 1rem;
             transition: all 0.3s ease;
             outline: none;
             font-family: inherit;
-            background-color: var(--panel-bg-light);
+            background: rgba(255, 255, 255, 0.1);
             color: var(--text-color-light);
+            backdrop-filter: blur(10px);
+        }
+
+        .night-mode textarea, 
+        .night-mode input[type="number"], 
+        .night-mode select, 
+        .night-mode button {
+            background: rgba(27, 59, 20, 0.2);
+            border: 2px solid rgba(27, 59, 20, 0.4);
         }
 
         textarea { resize: none; min-height: 80px; }
@@ -504,11 +747,16 @@
         .slider-group input[type="range"] {
             flex-grow: 1;
             -webkit-appearance: none;
-            background: var(--border-color-light);
+            background: rgba(255, 255, 255, 0.2);
             height: 6px;
             border-radius: 3px;
             border: none;
         }
+
+        .night-mode .slider-group input[type="range"] {
+            background: rgba(245, 230, 211, 0.2);
+        }
+
         .slider-group input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
             width: 16px;
@@ -548,10 +796,15 @@
             position: absolute;
             cursor: pointer;
             top: 0; left: 0; right: 0; bottom: 0;
-            background-color: var(--border-color-light);
+            background: rgba(255, 255, 255, 0.2);
             transition: .4s;
             border-radius: 28px;
         }
+
+        .night-mode .color-toggle-slider {
+            background: rgba(245, 230, 211, 0.2);
+        }
+
         .color-toggle-slider:before {
             position: absolute;
             content: "";
@@ -568,10 +821,15 @@
         }
 
         .backdrop-section {
-            border-top: 1px solid var(--border-color-light);
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
             padding-top: 16px;
             margin-top: 16px;
         }
+
+        .night-mode .backdrop-section {
+            border-top: 1px solid rgba(245, 230, 211, 0.2);
+        }
+
         .backdrop-header {
             font-weight: 600;
             margin-bottom: 12px;
@@ -633,7 +891,7 @@
                     <input type="checkbox" id="langToggle">
                     <span class="lang-slider">
                         <span id="fa-label">فا</span>
-                        <span id="en-label">En</span>
+                        <span id="en-label">Eng</span>
                     </span>
                 </label>
             </div>
@@ -643,8 +901,15 @@
     <main class="main-content">
         <div class="canvas-container">
             <div class="canvas-wrapper">
+                <div class="guide-lines">
+                    <div class="guide-line vertical"></div>
+                    <div class="guide-line horizontal"></div>
+                </div>
+                <div class="resize-handle nw"></div>
+                <div class="resize-handle ne"></div>
+                <div class="resize-handle sw"></div>
+                <div class="resize-handle se"></div>
                 <label for="imageInput" id="photo-placeholder">+</label>
-                <div id="edit-frame"></div>
                 <canvas id="canvas"></canvas>
             </div>
         </div>
@@ -665,6 +930,14 @@
                     <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
                 </svg>
                 <span data-fa="رنگ" data-en="Color">رنگ</span>
+            </button>
+            <button class="control-icon" data-panel="background">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                    <circle cx="8.5" cy="8.5" r="1.5"/>
+                    <path d="M21 15l-5-5L5 21"/>
+                </svg>
+                <span data-fa="بک گراند" data-en="Background">بک گراند</span>
             </button>
             <button class="control-icon" data-panel="effects">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -690,7 +963,13 @@
             <button class="close-panel" data-close="text">×</button>
         </div>
         <div class="panel-content">
-            <textarea id="textInput" data-fa="متن خودت رو بنویس" data-en="Write your text" placeholder="متن خودت رو بنویس" rows="3"></textarea>
+            <div class="font-panels-container" id="fontPanelsContainer">
+                <!-- Text panels will be added here dynamically -->
+            </div>
+            <button class="add-font-panel-btn" id="addFontPanelBtn">
+                <span>+</span>
+                <span data-fa="اضافه کردن متن جدید" data-en="Add new text">اضافه کردن متن جدید</span>
+            </button>
             <div class="font-add-group">
                 <label for="fontSelector" data-fa="فونت:" data-en="Font:">فونت:</label>
                 <select id="fontSelector">
@@ -710,7 +989,7 @@
 
     <div id="colorPanel" class="accordion-panel">
         <div class="panel-header">
-            <span data-fa="تنظیمات رنگ" data-en="Color Settings">تنظیمات رنگ</span>
+            <span data-fa="تنظیمات رنگ متن" data-en="Text Color Settings">تنظیمات رنگ متن</span>
             <button class="close-panel" data-close="color">×</button>
         </div>
         <div class="panel-content">
@@ -721,7 +1000,7 @@
                 <button class="color-swatch" data-color="green" style="background-color: #4CAF50;"></button>
                 <button class="color-swatch" data-color="blue" style="background-color: #2196F3;"></button>
                 <div class="rgb-wheel-container">
-                    <div class="rgb-trigger" id="rgbTrigger">RGB</div>
+                    <div class="rgb-trigger" id="rgbTrigger"></div>
                     <div class="rgb-wheel" id="rgbWheel">
                         <input type="color" id="colorPicker" value="#000000">
                     </div>
@@ -737,35 +1016,47 @@
                 <input type="range" id="opacitySlider" min="0" max="100" value="100">
                 <span id="opacityValue" class="slider-value">۱۰۰٪</span>
             </div>
-            <div class="backdrop-section">
-                <div class="backdrop-header" data-fa="کادر پشت متن" data-en="Text Background">کادر پشت متن</div>
-                <div class="color-toggle-container">
-                    <span class="color-toggle-label" data-fa="رنگ کادر سیاه/سفید" data-en="Black/White Background">رنگ کادر سیاه/سفید</span>
-                    <label class="color-toggle-switch">
-                        <input type="checkbox" id="blackWhiteBackdropToggle">
-                        <span class="color-toggle-slider"></span>
-                    </label>
+        </div>
+    </div>
+
+    <div id="backgroundPanel" class="accordion-panel">
+        <div class="panel-header">
+            <span data-fa="تنظیمات پس زمینه متن" data-en="Text Background Settings">تنظیمات پس زمینه متن</span>
+            <button class="close-panel" data-close="background">×</button>
+        </div>
+        <div class="panel-content">
+            <div class="color-presets">
+                <button class="color-swatch bg-black" data-color="black" style="background-color: #000000;"></button>
+                <button class="color-swatch bg-white" data-color="white" style="background-color: #ffffff; border: 1px solid #ccc;"></button>
+                <button class="color-swatch bg-red" data-color="red" style="background-color: #f44336;"></button>
+                <button class="color-swatch bg-green" data-color="green" style="background-color: #4CAF50;"></button>
+                <button class="color-swatch bg-blue" data-color="blue" style="background-color: #2196F3;"></button>
+                <div class="rgb-wheel-container">
+                    <div class="rgb-bg-trigger" id="rgbBgTrigger"></div>
+                    <div class="rgb-wheel" id="rgbBgWheel">
+                        <input type="color" id="bgColorPicker" value="#000000">
+                    </div>
                 </div>
-                <div class="slider-group">
-                    <label for="backdropOpacitySlider" data-fa="شفافیت کادر:" data-en="Background Opacity:">شفافیت کادر:</label>
-                    <input type="range" id="backdropOpacitySlider" min="0" max="100" value="0">
-                    <span id="backdropOpacityValue" class="slider-value">۰٪</span>
-                </div>
-                <div class="slider-group">
-                    <label for="backdropRadiusSlider" data-fa="گردی گوشه‌ها:" data-en="Corner Radius:">گردی گوشه‌ها:</label>
-                    <input type="range" id="backdropRadiusSlider" min="0" max="100" value="0">
-                    <span id="backdropRadiusValue" class="slider-value">۰</span>
-                </div>
-                <div class="slider-group">
-                    <label for="backdropWidthSlider" data-fa="پهنای کادر:" data-en="Background Width:">پهنای کادر:</label>
-                    <input type="range" id="backdropWidthSlider" min="0" max="100" value="0">
-                    <span id="backdropWidthValue" class="slider-value">۰</span>
-                </div>
-                <div class="slider-group">
-                    <label for="backdropHeightSlider" data-fa="ارتفاع کادر:" data-en="Background Height:">ارتفاع کادر:</label>
-                    <input type="range" id="backdropHeightSlider" min="0" max="100" value="0">
-                    <span id="backdropHeightValue" class="slider-value">۰</span>
-                </div>
+            </div>
+            <div class="slider-group">
+                <label for="backdropOpacitySlider" data-fa="شفافیت کادر:" data-en="Background Opacity:">شفافیت کادر:</label>
+                <input type="range" id="backdropOpacitySlider" min="0" max="100" value="0">
+                <span id="backdropOpacityValue" class="slider-value">۰٪</span>
+            </div>
+            <div class="slider-group">
+                <label for="backdropRadiusSlider" data-fa="گردی گوشه‌ها:" data-en="Corner Radius:">گردی گوشه‌ها:</label>
+                <input type="range" id="backdropRadiusSlider" min="0" max="100" value="0">
+                <span id="backdropRadiusValue" class="slider-value">۰</span>
+            </div>
+            <div class="slider-group">
+                <label for="backdropWidthSlider" data-fa="پهنای کادر:" data-en="Background Width:">پهنای کادر:</label>
+                <input type="range" id="backdropWidthSlider" min="0" max="100" value="0">
+                <span id="backdropWidthValue" class="slider-value">۰</span>
+            </div>
+            <div class="slider-group">
+                <label for="backdropHeightSlider" data-fa="ارتفاع کادر:" data-en="Background Height:">ارتفاع کادر:</label>
+                <input type="range" id="backdropHeightSlider" min="0" max="100" value="0">
+                <span id="backdropHeightValue" class="slider-value">۰</span>
             </div>
         </div>
     </div>
@@ -812,17 +1103,20 @@
         // DOM Elements
         const imageInput = document.getElementById('imageInput');
         const fontInput = document.getElementById('fontInput');
-        const textInput = document.getElementById('textInput');
         const fontSelector = document.getElementById('fontSelector');
         const fontSizeSlider = document.getElementById('fontSizeSlider');
         const fontSizeValue = document.getElementById('fontSizeValue');
         
-        const colorSwatches = document.querySelectorAll('.color-swatch');
+        const colorSwatches = document.querySelectorAll('.color-swatch:not(.bg-black):not(.bg-white):not(.bg-red):not(.bg-green):not(.bg-blue)');
+        const bgColorSwatches = document.querySelectorAll('.bg-black, .bg-white, .bg-red, .bg-green, .bg-blue');
         const shadeSlider = document.getElementById('shadeSlider');
         const shadeValue = document.getElementById('shadeValue');
         const colorPicker = document.getElementById('colorPicker');
+        const bgColorPicker = document.getElementById('bgColorPicker');
         const rgbTrigger = document.getElementById('rgbTrigger');
         const rgbWheel = document.getElementById('rgbWheel');
+        const rgbBgTrigger = document.getElementById('rgbBgTrigger');
+        const rgbBgWheel = document.getElementById('rgbBgWheel');
 
         const opacitySlider = document.getElementById('opacitySlider');
         const opacityValue = document.getElementById('opacityValue');
@@ -845,7 +1139,6 @@
         const ctx = canvas.getContext('2d');
         const canvasWrapper = document.querySelector('.canvas-wrapper');
         const photoPlaceholder = document.getElementById('photo-placeholder');
-        const editFrame = document.getElementById('edit-frame');
 
         const backdropOpacitySlider = document.getElementById('backdropOpacitySlider');
         const backdropWidthSlider = document.getElementById('backdropWidthSlider');
@@ -855,11 +1148,21 @@
         const backdropWidthValue = document.getElementById('backdropWidthValue');
         const backdropHeightValue = document.getElementById('backdropHeightValue');
         const backdropRadiusValue = document.getElementById('backdropRadiusValue');
-        const blackWhiteBackdropToggle = document.getElementById('blackWhiteBackdropToggle');
 
         const controlIcons = document.querySelectorAll('.control-icon');
         const accordionPanels = document.querySelectorAll('.accordion-panel');
         const closePanelBtns = document.querySelectorAll('.close-panel');
+
+        // Font panels management
+        const fontPanelsContainer = document.getElementById('fontPanelsContainer');
+        const addFontPanelBtn = document.getElementById('addFontPanelBtn');
+
+        // Guide lines
+        const verticalGuide = document.querySelector('.guide-line.vertical');
+        const horizontalGuide = document.querySelector('.guide-line.horizontal');
+
+        // Resize handles
+        const resizeHandles = document.querySelectorAll('.resize-handle');
 
         const translations = {
             fa: {
@@ -869,7 +1172,9 @@
                 alertFont: 'شما می‌توانید حداکثر ۳ فونت سفارشی اضافه کنید.',
                 alertFontSuccess: (fileName) => `فونت ${fileName} بارگذاری شد!`,
                 alertFontError: (message) => `خطا در بارگذاری فونت: ${message}`,
-                stickerSuccess: 'استیکر به کلیپ‌بورد کپی شد!'
+                stickerSuccess: 'استیکر به کلیپ‌بورد کپی شد!',
+                maxPanels: 'حداکثر ۳ پنل متن می‌توانید داشته باشید.',
+                textPlaceholder: 'متن خودت رو بنویس'
             },
             en: {
                 initialCanvasText: '',
@@ -878,7 +1183,9 @@
                 alertFont: 'You can add maximum 3 custom fonts.',
                 alertFontSuccess: (fileName) => `Font ${fileName} loaded successfully!`,
                 alertFontError: (message) => `Font loading error: ${message}`,
-                stickerSuccess: 'Sticker copied to clipboard!'
+                stickerSuccess: 'Sticker copied to clipboard!',
+                maxPanels: 'You can have maximum 3 text panels.',
+                textPlaceholder: 'Write your text'
             }
         };
 
@@ -888,35 +1195,53 @@
 
         // App State
         let img = null;
-        let fontSize = 50;
-        let textColor = 'rgb(0,0,0)';
-        let textOpacity = 1;
         let currentFont = 'Vazirmatn';
         let customFontsCount = 0;
         const MAX_CUSTOM_FONTS = 3;
-        let shadowBlur = 0;
-        let strokeWidth = 0;
-        let glowBlur = 0;
+        
+        // Text objects array - each text has its own properties
+        let textObjects = [];
+        let selectedTextIndex = -1;
+        let maxTextObjects = 3;
         
         // Interaction states
         let isDraggingText = false;
         let isDraggingCanvas = false;
         let isPinching = false;
+        let isResizing = false;
         let initialPinchDistance = 0;
         let lastFontSize = 50;
+        let resizeHandle = null;
+        let initialCanvasSize = { width: 0, height: 0 };
 
-        let selectedTextBox = { x: 0, y: 0, width: 200, height: 60 };
         let dragStart = { x: 0, y: 0 };
         let wrapperPos = { x: 0, y: 0 };
-        let editFrameTimeout;
 
-        let backdropColor = 'rgb(0,0,0)';
-        let backdropOpacity = 0;
-        let backdropRadius = 0; 
-        let backdropWidthPercentage = 0;
-        let backdropHeightPercentage = 0;
-        let textMetrics = null;
-        let selectedColorMode = 'black';
+        // Font panels management
+        let fontPanels = [];
+
+        // Default text object structure
+        function createTextObject(text = '', x = 0, y = 0) {
+            return {
+                text: text,
+                x: x,
+                y: y,
+                width: 200,
+                height: 60,
+                fontSize: 50,
+                color: 'rgb(0,0,0)',
+                opacity: 1,
+                shadowBlur: 0,
+                strokeWidth: 0,
+                glowBlur: 0,
+                backdropColor: 'rgb(0,0,0)',
+                backdropOpacity: 0,
+                backdropRadius: 0,
+                backdropWidthPercentage: 0,
+                backdropHeightPercentage: 0,
+                font: 'Vazirmatn'
+            };
+        }
 
         // Language switching function
         function switchLanguage(lang) {
@@ -927,7 +1252,7 @@
             // Update all translatable elements
             const elements = document.querySelectorAll('[data-fa][data-en]');
             elements.forEach(el => {
-                if (el.tagName === 'INPUT' && el.type === 'text') {
+                if (el.tagName === 'INPUT' && (el.type === 'text' || el.type === 'textarea')) {
                     el.placeholder = el.getAttribute(`data-${lang}`);
                 } else if (el.tagName === 'TEXTAREA') {
                     el.placeholder = el.getAttribute(`data-${lang}`);
@@ -936,29 +1261,182 @@
                 }
             });
             
+            // Update existing text panel placeholders
+            fontPanels.forEach(panel => {
+                const input = panel.querySelector('.font-text-input');
+                input.placeholder = translations[lang].textPlaceholder;
+            });
+            
             updateSliderValues();
         }
+
+        // Font panel management
+        function addFontPanel() {
+            if (fontPanels.length >= maxTextObjects) {
+                showAlert(translations[currentLang].maxPanels);
+                return;
+            }
+
+            const panelDiv = document.createElement('div');
+            panelDiv.className = 'font-panel';
+            panelDiv.innerHTML = `
+                <input type="text" placeholder="${translations[currentLang].textPlaceholder}" class="font-text-input">
+                <button class="remove-font">×</button>
+            `;
+
+            const textInput = panelDiv.querySelector('.font-text-input');
+            const removeBtn = panelDiv.querySelector('.remove-font');
+
+            textInput.addEventListener('input', (e) => {
+                const panelIndex = fontPanels.indexOf(panelDiv);
+                if (textObjects[panelIndex]) {
+                    textObjects[panelIndex].text = e.target.value;
+                    drawCanvas();
+                }
+            });
+
+            textInput.addEventListener('focus', () => {
+                const panelIndex = fontPanels.indexOf(panelDiv);
+                selectTextObject(panelIndex);
+            });
+
+            removeBtn.addEventListener('click', () => {
+                removeFontPanel(panelDiv);
+            });
+
+            fontPanelsContainer.appendChild(panelDiv);
+            fontPanels.push(panelDiv);
+
+            // Create corresponding text object
+            const textObj = createTextObject('', canvas.width / 2 - 100, (canvas.height / 2 - 30) + (textObjects.length * 40));
+            textObjects.push(textObj);
+
+            if (fontPanels.length >= maxTextObjects) {
+                addFontPanelBtn.disabled = true;
+            }
+
+            // Select the new text object
+            selectTextObject(textObjects.length - 1);
+            drawCanvas();
+        }
+
+        function removeFontPanel(panelDiv) {
+            const index = fontPanels.indexOf(panelDiv);
+            if (index > -1) {
+                fontPanels.splice(index, 1);
+                textObjects.splice(index, 1);
+                panelDiv.remove();
+                addFontPanelBtn.disabled = false;
+                
+                // Update selection
+                if (selectedTextIndex >= index) {
+                    selectedTextIndex = Math.max(0, selectedTextIndex - 1);
+                }
+                if (textObjects.length === 0) {
+                    selectedTextIndex = -1;
+                }
+                
+                updateUIFromSelectedText();
+                drawCanvas();
+            }
+        }
+
+        function selectTextObject(index) {
+            if (index >= 0 && index < textObjects.length) {
+                selectedTextIndex = index;
+                
+                // Update UI panels visual selection
+                fontPanels.forEach((panel, i) => {
+                    panel.classList.toggle('selected', i === index);
+                });
+                
+                updateUIFromSelectedText();
+                drawCanvas();
+            }
+        }
+
+        function updateUIFromSelectedText() {
+            if (selectedTextIndex >= 0 && textObjects[selectedTextIndex]) {
+                const textObj = textObjects[selectedTextIndex];
+                
+                // Update sliders and values
+                fontSizeSlider.value = textObj.fontSize;
+                opacitySlider.value = textObj.opacity * 100;
+                shadowSlider.value = textObj.shadowBlur;
+                strokeSlider.value = textObj.strokeWidth;
+                glowSlider.value = textObj.glowBlur;
+                backdropOpacitySlider.value = textObj.backdropOpacity * 100;
+                backdropRadiusSlider.value = textObj.backdropRadius;
+                backdropWidthSlider.value = textObj.backdropWidthPercentage;
+                backdropHeightSlider.value = textObj.backdropHeightPercentage;
+                fontSelector.value = textObj.font;
+                
+                // Update color pickers
+                colorPicker.value = textObj.color.includes('rgb') ? rgbToHex(textObj.color) : textObj.color;
+                bgColorPicker.value = textObj.backdropColor.includes('rgb') ? rgbToHex(textObj.backdropColor) : textObj.backdropColor;
+                
+                updateSliderValues();
+            }
+        }
+
+        function rgbToHex(rgb) {
+            const result = rgb.match(/\d+/g);
+            if (result && result.length >= 3) {
+                return "#" + ((1 << 24) + (parseInt(result[0]) << 16) + (parseInt(result[1]) << 8) + parseInt(result[2])).toString(16).slice(1);
+            }
+            return rgb;
+        }
+
+        // Initialize first font panel
+        addFontPanelBtn.addEventListener('click', addFontPanel);
 
         // Dark mode detection
         if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) document.body.classList.add('night-mode');
         window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => document.body.classList.toggle('night-mode', event.matches));
 
-        // RGB Color Wheel
+        // RGB Color Wheel for Text
         rgbTrigger.addEventListener('click', (e) => {
             e.stopPropagation();
+            closeAllPanels();
             rgbWheel.classList.toggle('active');
+            rgbBgWheel.classList.remove('active');
         });
 
         colorPicker.addEventListener('input', (e) => {
-            textColor = e.target.value;
-            selectedColorMode = 'custom';
-            colorSwatches.forEach(s => s.classList.remove('active'));
-            drawCanvas();
+            if (selectedTextIndex >= 0 && textObjects[selectedTextIndex]) {
+                textObjects[selectedTextIndex].color = e.target.value;
+                colorSwatches.forEach(s => s.classList.remove('active'));
+                rgbTrigger.style.setProperty('--current-color', e.target.value);
+                drawCanvas();
+            }
         });
+
+        // RGB Color Wheel for Background
+        rgbBgTrigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            closeAllPanels();
+            rgbBgWheel.classList.toggle('active');
+            rgbWheel.classList.remove('active');
+        });
+
+        bgColorPicker.addEventListener('input', (e) => {
+            if (selectedTextIndex >= 0 && textObjects[selectedTextIndex]) {
+                textObjects[selectedTextIndex].backdropColor = e.target.value;
+                bgColorSwatches.forEach(s => s.classList.remove('active'));
+                rgbBgTrigger.style.setProperty('--current-bg-color', e.target.value);
+                drawCanvas();
+            }
+        });
+
+        function closeAllPanels() {
+            accordionPanels.forEach(p => p.classList.remove('active'));
+            controlIcons.forEach(i => i.classList.remove('active'));
+        }
 
         document.addEventListener('click', (e) => {
             if (!e.target.closest('.rgb-wheel-container')) {
                 rgbWheel.classList.remove('active');
+                rgbBgWheel.classList.remove('active');
             }
         });
 
@@ -1015,8 +1493,14 @@
                     
                     canvas.width = newWidth;
                     canvas.height = newHeight;
-                    selectedTextBox.x = (canvas.width - selectedTextBox.width) / 2;
-                    selectedTextBox.y = (canvas.height - selectedTextBox.height) / 2;
+                    initialCanvasSize = { width: newWidth, height: newHeight };
+                    
+                    // Reposition text objects to fit canvas
+                    textObjects.forEach((textObj, index) => {
+                        textObj.x = (canvas.width - textObj.width) / 2;
+                        textObj.y = (canvas.height - textObj.height) / 2 + (index * 40);
+                    });
+                    
                     photoPlaceholder.style.display = 'none'; // Hide placeholder
                     drawCanvas();
                 };
@@ -1041,6 +1525,9 @@
                     customFontsCount++;
                     fontSelector.value = fontName;
                     currentFont = fontName;
+                    if (selectedTextIndex >= 0 && textObjects[selectedTextIndex]) {
+                        textObjects[selectedTextIndex].font = fontName;
+                    }
                     drawCanvas();
                     showAlert(translations[currentLang].alertFontSuccess(file.name));
                 }).catch(error => showAlert(translations[currentLang].alertFontError(error.message)));
@@ -1048,7 +1535,28 @@
             reader.readAsArrayBuffer(file);
         });
         
-        canvas.addEventListener('click', () => { if (!document.querySelector('.accordion-panel.active')) { textInput.focus(); openPanel('text'); } });
+        canvas.addEventListener('click', (e) => { 
+            if (!document.querySelector('.accordion-panel.active')) { 
+                openPanel('text'); 
+            }
+            
+            // Check if clicking on a text object
+            const canvasPos = getCanvasPos(e);
+            let clickedTextIndex = -1;
+            
+            for (let i = textObjects.length - 1; i >= 0; i--) {
+                const textObj = textObjects[i];
+                if (canvasPos.x >= textObj.x && canvasPos.x <= textObj.x + textObj.width &&
+                    canvasPos.y >= textObj.y && canvasPos.y <= textObj.y + textObj.height) {
+                    clickedTextIndex = i;
+                    break;
+                }
+            }
+            
+            if (clickedTextIndex >= 0) {
+                selectTextObject(clickedTextIndex);
+            }
+        });
 
         // Custom Alert function
         function showAlert(message) {
@@ -1058,45 +1566,131 @@
             document.body.appendChild(modal);
         }
         
-        // Event Listeners
-        textInput.addEventListener('input', drawCanvas);
-        fontSelector.addEventListener('change', (e) => { currentFont = e.target.value; drawCanvas(); });
-        fontSizeSlider.addEventListener('input', (e) => { fontSize = parseInt(e.target.value, 10); updateSliderValues(); drawCanvas(); showEditFrame(); });
-        opacitySlider.addEventListener('input', (e) => { textOpacity = parseInt(e.target.value, 10) / 100; updateSliderValues(); drawCanvas(); });
-        shadowSlider.addEventListener('input', (e) => { shadowBlur = parseInt(e.target.value, 10); updateSliderValues(); drawCanvas(); });
-        strokeSlider.addEventListener('input', (e) => { strokeWidth = parseInt(e.target.value, 10); updateSliderValues(); drawCanvas(); });
-        glowSlider.addEventListener('input', (e) => { glowBlur = parseInt(e.target.value, 10); updateSliderValues(); drawCanvas(); });
-        backdropOpacitySlider.addEventListener('input', (e) => { backdropOpacity = parseInt(e.target.value, 10) / 100; updateSliderValues(); drawCanvas(); });
-        backdropRadiusSlider.addEventListener('input', (e) => { backdropRadius = parseInt(e.target.value, 10); updateSliderValues(); drawCanvas(); });
-        backdropWidthSlider.addEventListener('input', (e) => { backdropWidthPercentage = parseInt(e.target.value, 10); updateSliderValues(); drawCanvas(); });
-        backdropHeightSlider.addEventListener('input', (e) => { backdropHeightPercentage = parseInt(e.target.value, 10); updateSliderValues(); drawCanvas(); });
-        blackWhiteBackdropToggle.addEventListener('change', (e) => { backdropColor = e.target.checked ? 'rgb(0,0,0)' : 'rgb(255,255,255)'; drawCanvas(); });
+        // Event Listeners for sliders - apply to selected text
+        fontSelector.addEventListener('change', (e) => { 
+            currentFont = e.target.value; 
+            if (selectedTextIndex >= 0 && textObjects[selectedTextIndex]) {
+                textObjects[selectedTextIndex].font = e.target.value;
+            }
+            drawCanvas(); 
+        });
+        
+        fontSizeSlider.addEventListener('input', (e) => { 
+            if (selectedTextIndex >= 0 && textObjects[selectedTextIndex]) {
+                textObjects[selectedTextIndex].fontSize = parseInt(e.target.value, 10);
+            }
+            updateSliderValues(); 
+            drawCanvas(); 
+        });
+        
+        opacitySlider.addEventListener('input', (e) => { 
+            if (selectedTextIndex >= 0 && textObjects[selectedTextIndex]) {
+                textObjects[selectedTextIndex].opacity = parseInt(e.target.value, 10) / 100;
+            }
+            updateSliderValues(); 
+            drawCanvas(); 
+        });
+        
+        shadowSlider.addEventListener('input', (e) => { 
+            if (selectedTextIndex >= 0 && textObjects[selectedTextIndex]) {
+                textObjects[selectedTextIndex].shadowBlur = parseInt(e.target.value, 10);
+            }
+            updateSliderValues(); 
+            drawCanvas(); 
+        });
+        
+        strokeSlider.addEventListener('input', (e) => { 
+            if (selectedTextIndex >= 0 && textObjects[selectedTextIndex]) {
+                textObjects[selectedTextIndex].strokeWidth = parseInt(e.target.value, 10);
+            }
+            updateSliderValues(); 
+            drawCanvas(); 
+        });
+        
+        glowSlider.addEventListener('input', (e) => { 
+            if (selectedTextIndex >= 0 && textObjects[selectedTextIndex]) {
+                textObjects[selectedTextIndex].glowBlur = parseInt(e.target.value, 10);
+            }
+            updateSliderValues(); 
+            drawCanvas(); 
+        });
+        
+        backdropOpacitySlider.addEventListener('input', (e) => { 
+            if (selectedTextIndex >= 0 && textObjects[selectedTextIndex]) {
+                textObjects[selectedTextIndex].backdropOpacity = parseInt(e.target.value, 10) / 100;
+            }
+            updateSliderValues(); 
+            drawCanvas(); 
+        });
+        
+        backdropRadiusSlider.addEventListener('input', (e) => { 
+            if (selectedTextIndex >= 0 && textObjects[selectedTextIndex]) {
+                textObjects[selectedTextIndex].backdropRadius = parseInt(e.target.value, 10);
+            }
+            updateSliderValues(); 
+            drawCanvas(); 
+        });
+        
+        backdropWidthSlider.addEventListener('input', (e) => { 
+            if (selectedTextIndex >= 0 && textObjects[selectedTextIndex]) {
+                textObjects[selectedTextIndex].backdropWidthPercentage = parseInt(e.target.value, 10);
+            }
+            updateSliderValues(); 
+            drawCanvas(); 
+        });
+        
+        backdropHeightSlider.addEventListener('input', (e) => { 
+            if (selectedTextIndex >= 0 && textObjects[selectedTextIndex]) {
+                textObjects[selectedTextIndex].backdropHeightPercentage = parseInt(e.target.value, 10);
+            }
+            updateSliderValues(); 
+            drawCanvas(); 
+        });
         
         colorSwatches.forEach(swatch => {
             swatch.addEventListener('click', () => {
                 colorSwatches.forEach(s => s.classList.remove('active'));
                 swatch.classList.add('active');
-                selectedColorMode = swatch.dataset.color;
-                if (selectedColorMode === 'black') shadeSlider.value = 0;
-                else if (selectedColorMode === 'white') shadeSlider.value = 100;
-                else shadeSlider.value = 50;
-                updateTextColor();
+                const selectedColorMode = swatch.dataset.color;
+                let newColor;
+                switch(selectedColorMode) {
+                    case 'red': newColor = `rgb(244, 67, 54)`; break;
+                    case 'green': newColor = `rgb(76, 175, 80)`; break;
+                    case 'blue': newColor = `rgb(33, 150, 243)`; break;
+                    case 'white': newColor = `rgb(255, 255, 255)`; break;
+                    default: newColor = `rgb(0, 0, 0)`; break;
+                }
+                if (selectedTextIndex >= 0 && textObjects[selectedTextIndex]) {
+                    textObjects[selectedTextIndex].color = newColor;
+                    drawCanvas();
+                }
             });
         });
+
+        bgColorSwatches.forEach(swatch => {
+            swatch.addEventListener('click', () => {
+                bgColorSwatches.forEach(s => s.classList.remove('active'));
+                swatch.classList.add('active');
+                const selectedBgColorMode = swatch.dataset.color;
+                let newColor;
+                switch(selectedBgColorMode) {
+                    case 'red': newColor = `rgb(244, 67, 54)`; break;
+                    case 'green': newColor = `rgb(76, 175, 80)`; break;
+                    case 'blue': newColor = `rgb(33, 150, 243)`; break;
+                    case 'white': newColor = `rgb(255, 255, 255)`; break;
+                    default: newColor = `rgb(0, 0, 0)`; break;
+                }
+                if (selectedTextIndex >= 0 && textObjects[selectedTextIndex]) {
+                    textObjects[selectedTextIndex].backdropColor = newColor;
+                    drawCanvas();
+                }
+            });
+        });
+
         shadeSlider.addEventListener('input', updateTextColor);
 
         function updateTextColor() {
-            const l = shadeSlider.value;
-            let newColor;
-            switch(selectedColorMode) {
-                case 'red': newColor = `hsl(0, 100%, ${l}%)`; break;
-                case 'green': newColor = `hsl(120, 100%, ${l}%)`; break;
-                case 'blue': newColor = `hsl(240, 100%, ${l}%)`; break;
-                default: newColor = `hsl(0, 0%, ${l}%)`; break;
-            }
-            textColor = newColor;
-            updateSliderValues();
-            drawCanvas();
+            // This function can be used for shade adjustments if needed
         }
 
         function updateSliderValues() {
@@ -1115,20 +1709,39 @@
             backdropHeightValue.textContent = numFormat(backdropHeightSlider.value);
         }
         
-        // New: Show and manage the text edit frame
-        function showEditFrame() {
-            clearTimeout(editFrameTimeout);
-            const rect = canvas.getBoundingClientRect();
-            editFrame.style.left = `${(selectedTextBox.x / canvas.width * rect.width)}px`;
-            editFrame.style.top = `${(selectedTextBox.y / canvas.height * rect.height)}px`;
-            editFrame.style.width = `${(selectedTextBox.width / canvas.width * rect.width)}px`;
-            editFrame.style.height = `${(selectedTextBox.height / canvas.height * rect.height)}px`;
-            editFrame.style.opacity = '1';
-            editFrameTimeout = setTimeout(() => { editFrame.style.opacity = '0'; }, 2000);
+        // Guide lines management
+        function showGuideLines(textBox) {
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const textCenterX = textBox.x + textBox.width / 2;
+            const textCenterY = textBox.y + textBox.height / 2;
+            
+            const threshold = 10; // pixels
+            
+            if (Math.abs(textCenterX - centerX) < threshold) {
+                verticalGuide.classList.add('active');
+                // Snap to center
+                textBox.x = centerX - textBox.width / 2;
+            } else {
+                verticalGuide.classList.remove('active');
+            }
+            
+            if (Math.abs(textCenterY - centerY) < threshold) {
+                horizontalGuide.classList.add('active');
+                // Snap to center
+                textBox.y = centerY - textBox.height / 2;
+            } else {
+                horizontalGuide.classList.remove('active');
+            }
+        }
+
+        function hideGuideLines() {
+            verticalGuide.classList.remove('active');
+            horizontalGuide.classList.remove('active');
         }
 
         function drawCanvas() {
-            if (!img && !textInput.value.trim()) {
+            if (!img && textObjects.length === 0) {
                 const maxWidth = Math.min(window.innerWidth * 0.9, 400);
                 canvas.width = maxWidth;
                 canvas.height = maxWidth * 0.6;
@@ -1147,67 +1760,83 @@
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
             }
             
-            const textLines = textInput.value.split('\n');
-            if (textInput.value.trim() === '') return;
+            // Draw each text object
+            textObjects.forEach((textObj, index) => {
+                if (!textObj.text.trim()) return;
 
-            let calculatedFontSize = (fontSize / 100) * (canvas.width * 0.5);
-            ctx.font = `${calculatedFontSize}px ${currentFont}`;
-            let maxTextWidth = 0;
-            textLines.forEach(line => maxTextWidth = Math.max(maxTextWidth, ctx.measureText(line).width));
-            if (maxTextWidth > canvas.width * 0.95) calculatedFontSize *= (canvas.width * 0.95) / maxTextWidth;
-            ctx.font = `${calculatedFontSize}px ${currentFont}`;
-            
-            maxTextWidth = 0;
-            textLines.forEach(line => maxTextWidth = Math.max(maxTextWidth, ctx.measureText(line).width));
-            
-            const lineHeight = calculatedFontSize * 1.5;
-            const backdropPaddingX = (backdropWidthPercentage / 100) * maxTextWidth;
-            const backdropPaddingY = (backdropHeightPercentage / 100) * (lineHeight * textLines.length);
+                const textLines = textObj.text.split('\n');
+                let calculatedFontSize = (textObj.fontSize / 100) * (canvas.width * 0.5);
+                ctx.font = `${calculatedFontSize}px ${textObj.font}`;
+                let maxTextWidth = 0;
+                textLines.forEach(line => maxTextWidth = Math.max(maxTextWidth, ctx.measureText(line).width));
+                if (maxTextWidth > canvas.width * 0.95) calculatedFontSize *= (canvas.width * 0.95) / maxTextWidth;
+                ctx.font = `${calculatedFontSize}px ${textObj.font}`;
+                
+                maxTextWidth = 0;
+                textLines.forEach(line => maxTextWidth = Math.max(maxTextWidth, ctx.measureText(line).width));
+                
+                const lineHeight = calculatedFontSize * 1.5;
+                const backdropPaddingX = (textObj.backdropWidthPercentage / 100) * maxTextWidth;
+                const backdropPaddingY = (textObj.backdropHeightPercentage / 100) * (lineHeight * textLines.length);
 
-            selectedTextBox.width = maxTextWidth + backdropPaddingX;
-            selectedTextBox.height = (lineHeight * textLines.length) + backdropPaddingY;
-            selectedTextBox.x = Math.max(0, Math.min(selectedTextBox.x, canvas.width - selectedTextBox.width));
-            selectedTextBox.y = Math.max(0, Math.min(selectedTextBox.y, canvas.height - selectedTextBox.height));
+                textObj.width = maxTextWidth + backdropPaddingX;
+                textObj.height = (lineHeight * textLines.length) + backdropPaddingY;
+                textObj.x = Math.max(0, Math.min(textObj.x, canvas.width - textObj.width));
+                textObj.y = Math.max(0, Math.min(textObj.y, canvas.height - textObj.height));
 
-            if (backdropOpacity > 0) {
-                ctx.fillStyle = backdropColor;
-                ctx.globalAlpha = backdropOpacity;
-                const r = (backdropRadius / 100) * Math.min(selectedTextBox.width, selectedTextBox.height) / 2; 
-                ctx.beginPath();
-                ctx.moveTo(selectedTextBox.x + r, selectedTextBox.y);
-                ctx.arcTo(selectedTextBox.x + selectedTextBox.width, selectedTextBox.y, selectedTextBox.x + selectedTextBox.width, selectedTextBox.y + selectedTextBox.height, r);
-                ctx.arcTo(selectedTextBox.x + selectedTextBox.width, selectedTextBox.y + selectedTextBox.height, selectedTextBox.x, selectedTextBox.y + selectedTextBox.height, r);
-                ctx.arcTo(selectedTextBox.x, selectedTextBox.y + selectedTextBox.height, selectedTextBox.x, selectedTextBox.y, r);
-                ctx.arcTo(selectedTextBox.x, selectedTextBox.y, selectedTextBox.x + selectedTextBox.width, selectedTextBox.y, r);
-                ctx.closePath();
-                ctx.fill();
-            }
-            
-            ctx.globalAlpha = 1;
-            ctx.font = `${calculatedFontSize}px ${currentFont}`;
-            ctx.textAlign = "center";
-            ctx.textBaseline = "middle";
-            ctx.shadowColor = `rgba(0,0,0,0.5)`;
-            ctx.shadowBlur = shadowBlur;
-            ctx.strokeStyle = `rgb(0,0,0)`;
-            ctx.lineWidth = strokeWidth;
-            ctx.lineJoin = 'round';
-            
-            let lineY = selectedTextBox.y + (selectedTextBox.height / 2) - (((textLines.length - 1) * lineHeight) / 2);
-            textLines.forEach(line => {
-                const x = selectedTextBox.x + selectedTextBox.width / 2;
-                if (strokeWidth > 0) ctx.strokeText(line, x, lineY);
-                if (glowBlur > 0) {
-                    ctx.shadowColor = textColor;
-                    ctx.shadowBlur = glowBlur;
+                // Draw backdrop
+                if (textObj.backdropOpacity > 0) {
+                    ctx.fillStyle = textObj.backdropColor;
+                    ctx.globalAlpha = textObj.backdropOpacity;
+                    const r = (textObj.backdropRadius / 100) * Math.min(textObj.width, textObj.height) / 2; 
+                    ctx.beginPath();
+                    ctx.moveTo(textObj.x + r, textObj.y);
+                    ctx.arcTo(textObj.x + textObj.width, textObj.y, textObj.x + textObj.width, textObj.y + textObj.height, r);
+                    ctx.arcTo(textObj.x + textObj.width, textObj.y + textObj.height, textObj.x, textObj.y + textObj.height, r);
+                    ctx.arcTo(textObj.x, textObj.y + textObj.height, textObj.x, textObj.y, r);
+                    ctx.arcTo(textObj.x, textObj.y, textObj.x + textObj.width, textObj.y, r);
+                    ctx.closePath();
+                    ctx.fill();
                 }
-                ctx.fillStyle = textColor;
-                ctx.globalAlpha = textOpacity;
-                ctx.fillText(line, x, lineY);
-                ctx.shadowBlur = shadowBlur;
+                
+                // Draw text
+                ctx.globalAlpha = 1;
+                ctx.font = `${calculatedFontSize}px ${textObj.font}`;
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
                 ctx.shadowColor = `rgba(0,0,0,0.5)`;
-                lineY += lineHeight;
+                ctx.shadowBlur = textObj.shadowBlur;
+                ctx.strokeStyle = `rgb(0,0,0)`;
+                ctx.lineWidth = textObj.strokeWidth;
+                ctx.lineJoin = 'round';
+                
+                let lineY = textObj.y + (textObj.height / 2) - (((textLines.length - 1) * lineHeight) / 2);
+                textLines.forEach(line => {
+                    const x = textObj.x + textObj.width / 2;
+                    if (textObj.strokeWidth > 0) ctx.strokeText(line, x, lineY);
+                    if (textObj.glowBlur > 0) {
+                        ctx.shadowColor = textObj.color;
+                        ctx.shadowBlur = textObj.glowBlur;
+                    }
+                    ctx.fillStyle = textObj.color;
+                    ctx.globalAlpha = textObj.opacity;
+                    ctx.fillText(line, x, lineY);
+                    ctx.shadowBlur = textObj.shadowBlur;
+                    ctx.shadowColor = `rgba(0,0,0,0.5)`;
+                    lineY += lineHeight;
+                });
+                
+                // Draw selection frame for selected text
+                if (index === selectedTextIndex) {
+                    ctx.globalAlpha = 1;
+                    ctx.strokeStyle = '#1b3b14';
+                    ctx.lineWidth = 2;
+                    ctx.setLineDash([5, 5]);
+                    ctx.strokeRect(textObj.x - 2, textObj.y - 2, textObj.width + 4, textObj.height + 4);
+                    ctx.setLineDash([]);
+                }
             });
+            
             ctx.globalAlpha = 1;
             ctx.shadowBlur = 0;
         }
@@ -1227,6 +1856,85 @@
             return { x: (clientX - rect.left) * (canvas.width / rect.width), y: (clientY - rect.top) * (canvas.height / rect.height) };
         }
 
+        // Resize functionality
+        resizeHandles.forEach(handle => {
+            handle.addEventListener('mousedown', (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                isResizing = true;
+                resizeHandle = handle.classList.contains('se') ? 'se' : 
+                             handle.classList.contains('sw') ? 'sw' :
+                             handle.classList.contains('ne') ? 'ne' : 'nw';
+                
+                const rect = canvasWrapper.getBoundingClientRect();
+                dragStart.x = e.clientX;
+                dragStart.y = e.clientY;
+                initialCanvasSize.width = rect.width;
+                initialCanvasSize.height = rect.height;
+                
+                canvasWrapper.classList.add('resizing');
+            });
+        });
+
+        function handleResize(e) {
+            if (!isResizing) return;
+            
+            const deltaX = e.clientX - dragStart.x;
+            const deltaY = e.clientY - dragStart.y;
+            
+            let newWidth = initialCanvasSize.width;
+            let newHeight = initialCanvasSize.height;
+            
+            switch(resizeHandle) {
+                case 'se':
+                    newWidth += deltaX;
+                    newHeight += deltaY;
+                    break;
+                case 'sw':
+                    newWidth -= deltaX;
+                    newHeight += deltaY;
+                    break;
+                case 'ne':
+                    newWidth += deltaX;
+                    newHeight -= deltaY;
+                    break;
+                case 'nw':
+                    newWidth -= deltaX;
+                    newHeight -= deltaY;
+                    break;
+            }
+            
+            // Maintain aspect ratio if image is loaded
+            if (img) {
+                const aspectRatio = img.width / img.height;
+                newHeight = newWidth / aspectRatio;
+            }
+            
+            // Minimum size constraints
+            newWidth = Math.max(100, newWidth);
+            newHeight = Math.max(100, newHeight);
+            
+            // Maximum size constraints
+            newWidth = Math.min(window.innerWidth * 0.9, newWidth);
+            newHeight = Math.min(window.innerHeight * 0.7, newHeight);
+            
+            canvas.width = newWidth;
+            canvas.height = newHeight;
+            
+            // Adjust text objects positions proportionally
+            const scaleX = newWidth / initialCanvasSize.width;
+            const scaleY = newHeight / initialCanvasSize.height;
+            
+            textObjects.forEach(textObj => {
+                textObj.x *= scaleX;
+                textObj.y *= scaleY;
+                textObj.width *= scaleX;
+                textObj.height *= scaleY;
+            });
+            
+            drawCanvas();
+        }
+
         function handleStart(e) {
             if (e.touches && e.touches.length === 2) { // Pinch Start
                 e.preventDefault();
@@ -1234,16 +1942,32 @@
                 const t1 = e.touches[0];
                 const t2 = e.touches[1];
                 initialPinchDistance = Math.hypot(t1.clientX - t2.clientX, t1.clientY - t2.clientY);
-                lastFontSize = fontSize;
+                if (selectedTextIndex >= 0 && textObjects[selectedTextIndex]) {
+                    lastFontSize = textObjects[selectedTextIndex].fontSize;
+                }
                 return;
             }
 
             const canvasPos = getCanvasPos(e);
-            if (canvasPos.x >= selectedTextBox.x && canvasPos.x <= selectedTextBox.x + selectedTextBox.width &&
-                canvasPos.y >= selectedTextBox.y && canvasPos.y <= selectedTextBox.y + selectedTextBox.height) {
+            let clickedTextIndex = -1;
+            
+            // Check which text object was clicked (check from top to bottom)
+            for (let i = textObjects.length - 1; i >= 0; i--) {
+                const textObj = textObjects[i];
+                if (canvasPos.x >= textObj.x && canvasPos.x <= textObj.x + textObj.width &&
+                    canvasPos.y >= textObj.y && canvasPos.y <= textObj.y + textObj.height) {
+                    clickedTextIndex = i;
+                    break;
+                }
+            }
+            
+            if (clickedTextIndex >= 0) {
                 isDraggingText = true;
-                dragStart.x = canvasPos.x - selectedTextBox.x;
-                dragStart.y = canvasPos.y - selectedTextBox.y;
+                selectedTextIndex = clickedTextIndex;
+                selectTextObject(selectedTextIndex);
+                dragStart.x = canvasPos.x - textObjects[selectedTextIndex].x;
+                dragStart.y = canvasPos.y - textObjects[selectedTextIndex].y;
+                showGuideLines(textObjects[selectedTextIndex]);
             } else {
                 isDraggingCanvas = true;
                 const pointerPos = getPointerPos(e, canvasWrapper.parentElement);
@@ -1251,30 +1975,40 @@
                 dragStart.x = pointerPos.x - rect.left;
                 dragStart.y = pointerPos.y - rect.top;
             }
-            showEditFrame();
         }
 
         function handleMove(e) {
+            if (isResizing) {
+                handleResize(e);
+                return;
+            }
+            
             if (e.touches && e.touches.length === 2 && isPinching) { // Pinch Move
                 e.preventDefault();
                 const t1 = e.touches[0];
                 const t2 = e.touches[1];
                 const currentDist = Math.hypot(t1.clientX - t2.clientX, t1.clientY - t2.clientY);
                 const scale = currentDist / initialPinchDistance;
-                fontSize = Math.max(0, Math.min(100, lastFontSize * scale));
-                fontSizeSlider.value = fontSize;
-                updateSliderValues();
-                drawCanvas();
-                showEditFrame();
+                if (selectedTextIndex >= 0 && textObjects[selectedTextIndex]) {
+                    textObjects[selectedTextIndex].fontSize = Math.max(0, Math.min(100, lastFontSize * scale));
+                    fontSizeSlider.value = textObjects[selectedTextIndex].fontSize;
+                    updateSliderValues();
+                    drawCanvas();
+                }
                 return;
             }
 
-            if (isDraggingText) {
+            if (isDraggingText && selectedTextIndex >= 0) {
                 const canvasPos = getCanvasPos(e);
-                selectedTextBox.x = Math.max(0, Math.min(canvasPos.x - dragStart.x, canvas.width - selectedTextBox.width));
-                selectedTextBox.y = Math.max(0, Math.min(canvasPos.y - dragStart.y, canvas.height - selectedTextBox.height));
+                const textObj = textObjects[selectedTextIndex];
+                const newX = Math.max(0, Math.min(canvasPos.x - dragStart.x, canvas.width - textObj.width));
+                const newY = Math.max(0, Math.min(canvasPos.y - dragStart.y, canvas.height - textObj.height));
+                
+                textObj.x = newX;
+                textObj.y = newY;
+                
+                showGuideLines(textObj);
                 drawCanvas();
-                showEditFrame();
             } else if (isDraggingCanvas) {
                 e.preventDefault();
                 const pointerPos = getPointerPos(e, canvasWrapper.parentElement);
@@ -1286,9 +2020,18 @@
 
         function handleEnd(e) {
             if (e.touches && e.touches.length > 0) return; // Still fingers on screen
+            
             isDraggingText = false;
             isDraggingCanvas = false;
             isPinching = false;
+            
+            if (isResizing) {
+                isResizing = false;
+                resizeHandle = null;
+                canvasWrapper.classList.remove('resizing');
+            }
+            
+            hideGuideLines();
         }
 
         canvasWrapper.addEventListener('mousedown', handleStart);
@@ -1301,7 +2044,7 @@
         
         // Download functions
         function downloadImage(format = 'png') {
-            if (!img && textInput.value.trim() === '') return showAlert(translations[currentLang].alertImage);
+            if (!img && textObjects.length === 0) return showAlert(translations[currentLang].alertImage);
             
             const link = document.createElement('a');
             const mimeType = `image/${format}`;
@@ -1317,48 +2060,52 @@
             if (img) tempCtx.drawImage(img, 0, 0, tempCanvas.width, tempCanvas.height);
             else { tempCtx.fillStyle = "#FFFFFF"; tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height); }
 
-            const textLines = textInput.value.split('\n');
-            if (textInput.value.trim() !== '') {
-                let originalFontSize = (fontSize / 100) * (canvas.width * 0.5);
-                ctx.font = `${originalFontSize}px ${currentFont}`;
+            // Draw all text objects
+            textObjects.forEach(textObj => {
+                if (!textObj.text.trim()) return;
+                
+                const textLines = textObj.text.split('\n');
+                let originalFontSize = (textObj.fontSize / 100) * (canvas.width * 0.5);
+                ctx.font = `${originalFontSize}px ${textObj.font}`;
                 let maxTextWidth = 0;
                 textLines.forEach(line => maxTextWidth = Math.max(maxTextWidth, ctx.measureText(line).width));
                 if (maxTextWidth > canvas.width * 0.95) originalFontSize *= (canvas.width * 0.95) / maxTextWidth;
 
                 const finalFontSize = originalFontSize * scale;
                 const finalLineHeight = finalFontSize * 1.5;
-                tempCtx.font = `${finalFontSize}px ${currentFont}`;
+                tempCtx.font = `${finalFontSize}px ${textObj.font}`;
                 tempCtx.textAlign = "center";
                 tempCtx.textBaseline = "middle";
 
-                const finalX = (selectedTextBox.x + selectedTextBox.width / 2) * scale;
-                let finalY = ((selectedTextBox.y + selectedTextBox.height / 2) - (((textLines.length - 1) * originalFontSize * 1.5) / 2)) * scale;
+                const finalX = (textObj.x + textObj.width / 2) * scale;
+                let finalY = ((textObj.y + textObj.height / 2) - (((textLines.length - 1) * originalFontSize * 1.5) / 2)) * scale;
 
-                if (backdropOpacity > 0) {
-                    const finalBackdropX = selectedTextBox.x * scale;
-                    const finalBackdropY = selectedTextBox.y * scale;
-                    const finalBackdropW = selectedTextBox.width * scale;
-                    const finalBackdropH = selectedTextBox.height * scale;
-                    const r = (backdropRadius / 100) * Math.min(finalBackdropW, finalBackdropH) / 2;
-                    tempCtx.fillStyle = backdropColor; tempCtx.globalAlpha = backdropOpacity; tempCtx.beginPath(); tempCtx.moveTo(finalBackdropX + r, finalBackdropY); tempCtx.arcTo(finalBackdropX + finalBackdropW, finalBackdropY, finalBackdropX + finalBackdropW, finalBackdropY + finalBackdropH, r); tempCtx.arcTo(finalBackdropX + finalBackdropW, finalBackdropY + finalBackdropH, finalBackdropX, finalBackdropY + finalBackdropH, r); tempCtx.arcTo(finalBackdropX, finalBackdropY + finalBackdropH, finalBackdropX, finalBackdropY, r); tempCtx.arcTo(finalBackdropX, finalBackdropY, finalBackdropX + finalBackdropW, finalBackdropY, r); tempCtx.closePath(); tempCtx.fill();
+                if (textObj.backdropOpacity > 0) {
+                    const finalBackdropX = textObj.x * scale;
+                    const finalBackdropY = textObj.y * scale;
+                    const finalBackdropW = textObj.width * scale;
+                    const finalBackdropH = textObj.height * scale;
+                    const r = (textObj.backdropRadius / 100) * Math.min(finalBackdropW, finalBackdropH) / 2;
+                    tempCtx.fillStyle = textObj.backdropColor; tempCtx.globalAlpha = textObj.backdropOpacity; tempCtx.beginPath(); tempCtx.moveTo(finalBackdropX + r, finalBackdropY); tempCtx.arcTo(finalBackdropX + finalBackdropW, finalBackdropY, finalBackdropX + finalBackdropW, finalBackdropY + finalBackdropH, r); tempCtx.arcTo(finalBackdropX + finalBackdropW, finalBackdropY + finalBackdropH, finalBackdropX, finalBackdropY + finalBackdropH, r); tempCtx.arcTo(finalBackdropX, finalBackdropY + finalBackdropH, finalBackdropX, finalBackdropY, r); tempCtx.arcTo(finalBackdropX, finalBackdropY, finalBackdropX + finalBackdropW, finalBackdropY, r); tempCtx.closePath(); tempCtx.fill();
                 }
 
-                tempCtx.globalAlpha = 1; tempCtx.shadowColor = `rgba(0,0,0,0.5)`; tempCtx.shadowBlur = shadowBlur * scale; tempCtx.strokeStyle = `rgb(0,0,0)`; tempCtx.lineWidth = strokeWidth * scale; tempCtx.lineJoin = 'round';
+                tempCtx.globalAlpha = 1; tempCtx.shadowColor = `rgba(0,0,0,0.5)`; tempCtx.shadowBlur = textObj.shadowBlur * scale; tempCtx.strokeStyle = `rgb(0,0,0)`; tempCtx.lineWidth = textObj.strokeWidth * scale; tempCtx.lineJoin = 'round';
                 
                 textLines.forEach(line => {
-                    if (strokeWidth > 0) tempCtx.strokeText(line, finalX, finalY);
-                    if (glowBlur > 0) { tempCtx.shadowColor = textColor; tempCtx.shadowBlur = glowBlur * scale; }
-                    tempCtx.fillStyle = textColor; tempCtx.globalAlpha = textOpacity; tempCtx.fillText(line, finalX, finalY);
-                    tempCtx.shadowBlur = shadowBlur * scale; tempCtx.shadowColor = `rgba(0,0,0,0.5)`;
+                    if (textObj.strokeWidth > 0) tempCtx.strokeText(line, finalX, finalY);
+                    if (textObj.glowBlur > 0) { tempCtx.shadowColor = textObj.color; tempCtx.shadowBlur = textObj.glowBlur * scale; }
+                    tempCtx.fillStyle = textObj.color; tempCtx.globalAlpha = textObj.opacity; tempCtx.fillText(line, finalX, finalY);
+                    tempCtx.shadowBlur = textObj.shadowBlur * scale; tempCtx.shadowColor = `rgba(0,0,0,0.5)`;
                     finalY += finalLineHeight;
                 });
-            }
+            });
+            
             link.href = tempCanvas.toDataURL(mimeType, 0.9);
             link.click();
         }
 
         function downloadTransparentText() {
-            if (textInput.value.trim() === '') return showAlert(translations[currentLang].alertText);
+            if (textObjects.length === 0 || !textObjects.some(t => t.text.trim())) return showAlert(translations[currentLang].alertText);
             
             const link = document.createElement('a');
             link.download = 'daco-text-transparent.png';
@@ -1367,45 +2114,58 @@
             const tempCtx = tempCanvas.getContext('2d');
             const scale = 2;
             
-            let originalFontSize = (fontSize / 100) * (canvas.width * 0.5);
-            ctx.font = `${originalFontSize}px ${currentFont}`;
-            let maxTextWidth = 0;
-            const textLines = textInput.value.split('\n');
-            textLines.forEach(line => maxTextWidth = Math.max(maxTextWidth, ctx.measureText(line).width));
-            if (maxTextWidth > canvas.width * 0.95) originalFontSize *= (canvas.width * 0.95) / maxTextWidth;
+            // Calculate bounding box for all texts
+            let minX = canvas.width, minY = canvas.height, maxX = 0, maxY = 0;
+            textObjects.forEach(textObj => {
+                if (!textObj.text.trim()) return;
+                minX = Math.min(minX, textObj.x);
+                minY = Math.min(minY, textObj.y);
+                maxX = Math.max(maxX, textObj.x + textObj.width);
+                maxY = Math.max(maxY, textObj.y + textObj.height);
+            });
             
-            const textHeight = originalFontSize * 1.5 * textLines.length;
-            const padding = Math.max(strokeWidth, shadowBlur, glowBlur) * 4;
-            tempCanvas.width = (maxTextWidth + padding * 2) * scale;
-            tempCanvas.height = (textHeight + padding * 2) * scale;
+            const padding = 20;
+            tempCanvas.width = (maxX - minX + padding * 2) * scale;
+            tempCanvas.height = (maxY - minY + padding * 2) * scale;
             
-            const finalFontSize = originalFontSize * scale;
-            const finalLineHeight = finalFontSize * 1.5;
-            tempCtx.font = `${finalFontSize}px ${currentFont}`;
-            tempCtx.textAlign = "center";
-            tempCtx.textBaseline = "middle";
-            
-            const finalX = tempCanvas.width / 2;
-            let finalY = (tempCanvas.height / 2) - (((textLines.length - 1) * finalLineHeight) / 2);
-            
-            tempCtx.shadowColor = `rgba(0,0,0,0.5)`;
-            tempCtx.shadowBlur = shadowBlur * scale;
-            tempCtx.strokeStyle = `rgb(0,0,0)`;
-            tempCtx.lineWidth = strokeWidth * scale;
-            tempCtx.lineJoin = 'round';
-            
-            textLines.forEach(line => {
-                if (strokeWidth > 0) tempCtx.strokeText(line, finalX, finalY);
-                if (glowBlur > 0) {
-                    tempCtx.shadowColor = textColor;
-                    tempCtx.shadowBlur = glowBlur * scale;
-                }
-                tempCtx.fillStyle = textColor;
-                tempCtx.globalAlpha = textOpacity;
-                tempCtx.fillText(line, finalX, finalY);
-                tempCtx.shadowBlur = shadowBlur * scale;
+            textObjects.forEach(textObj => {
+                if (!textObj.text.trim()) return;
+                
+                const textLines = textObj.text.split('\n');
+                let originalFontSize = (textObj.fontSize / 100) * (canvas.width * 0.5);
+                ctx.font = `${originalFontSize}px ${textObj.font}`;
+                let maxTextWidth = 0;
+                textLines.forEach(line => maxTextWidth = Math.max(maxTextWidth, ctx.measureText(line).width));
+                if (maxTextWidth > canvas.width * 0.95) originalFontSize *= (canvas.width * 0.95) / maxTextWidth;
+                
+                const finalFontSize = originalFontSize * scale;
+                const finalLineHeight = finalFontSize * 1.5;
+                tempCtx.font = `${finalFontSize}px ${textObj.font}`;
+                tempCtx.textAlign = "center";
+                tempCtx.textBaseline = "middle";
+                
+                const finalX = ((textObj.x - minX + padding) + textObj.width / 2) * scale;
+                let finalY = (((textObj.y - minY + padding) + textObj.height / 2) - (((textLines.length - 1) * originalFontSize * 1.5) / 2)) * scale;
+                
                 tempCtx.shadowColor = `rgba(0,0,0,0.5)`;
-                finalY += finalLineHeight;
+                tempCtx.shadowBlur = textObj.shadowBlur * scale;
+                tempCtx.strokeStyle = `rgb(0,0,0)`;
+                tempCtx.lineWidth = textObj.strokeWidth * scale;
+                tempCtx.lineJoin = 'round';
+                
+                textLines.forEach(line => {
+                    if (textObj.strokeWidth > 0) tempCtx.strokeText(line, finalX, finalY);
+                    if (textObj.glowBlur > 0) {
+                        tempCtx.shadowColor = textObj.color;
+                        tempCtx.shadowBlur = textObj.glowBlur * scale;
+                    }
+                    tempCtx.fillStyle = textObj.color;
+                    tempCtx.globalAlpha = textObj.opacity;
+                    tempCtx.fillText(line, finalX, finalY);
+                    tempCtx.shadowBlur = textObj.shadowBlur * scale;
+                    tempCtx.shadowColor = `rgba(0,0,0,0.5)`;
+                    finalY += finalLineHeight;
+                });
             });
             
             link.href = tempCanvas.toDataURL('image/png');
@@ -1413,36 +2173,69 @@
         }
 
         async function copyAsSticker() {
-            if (textInput.value.trim() === '') return showAlert(translations[currentLang].alertText);
+            if (textObjects.length === 0 || !textObjects.some(t => t.text.trim())) return showAlert(translations[currentLang].alertText);
+            
             try {
-                 const tempCanvas = document.createElement('canvas');
-                 const tempCtx = tempCanvas.getContext('2d');
-                 const scale = 2;
-                 let originalFontSize = (fontSize / 100) * (canvas.width * 0.5);
-                 ctx.font = `${originalFontSize}px ${currentFont}`;
-                 let maxTextWidth = 0;
-                 const textLines = textInput.value.split('\n');
-                 textLines.forEach(line => maxTextWidth = Math.max(maxTextWidth, ctx.measureText(line).width));
-                 if (maxTextWidth > canvas.width * 0.95) originalFontSize *= (canvas.width * 0.95) / maxTextWidth;
-                 const textHeight = originalFontSize * 1.5 * textLines.length;
-                 const padding = Math.max(strokeWidth, shadowBlur, glowBlur) * 4;
-                 tempCanvas.width = (maxTextWidth + padding * 2) * scale;
-                 tempCanvas.height = (textHeight + padding * 2) * scale;
-                 const finalFontSize = originalFontSize * scale;
-                 const finalLineHeight = finalFontSize * 1.5;
-                 tempCtx.font = `${finalFontSize}px ${currentFont}`; tempCtx.textAlign = "center"; tempCtx.textBaseline = "middle";
-                 const finalX = tempCanvas.width / 2;
-                 let finalY = (tempCanvas.height / 2) - (((textLines.length - 1) * finalLineHeight) / 2);
-                 tempCtx.shadowColor = `rgba(0,0,0,0.5)`; tempCtx.shadowBlur = shadowBlur * scale; tempCtx.strokeStyle = `rgb(0,0,0)`; tempCtx.lineWidth = strokeWidth * scale; tempCtx.lineJoin = 'round';
-                 textLines.forEach(line => {
-                    if (strokeWidth > 0) tempCtx.strokeText(line, finalX, finalY);
-                    if (glowBlur > 0) { tempCtx.shadowColor = textColor; tempCtx.shadowBlur = glowBlur * scale; }
-                    tempCtx.fillStyle = textColor; tempCtx.globalAlpha = textOpacity; tempCtx.fillText(line, finalX, finalY);
-                    tempCtx.shadowBlur = shadowBlur * scale; tempCtx.shadowColor = `rgba(0,0,0,0.5)`;
-                    finalY += finalLineHeight;
-                 });
+                const tempCanvas = document.createElement('canvas');
+                const tempCtx = tempCanvas.getContext('2d');
+                const scale = 2;
+                
+                // Calculate bounding box for all texts
+                let minX = canvas.width, minY = canvas.height, maxX = 0, maxY = 0;
+                textObjects.forEach(textObj => {
+                    if (!textObj.text.trim()) return;
+                    minX = Math.min(minX, textObj.x);
+                    minY = Math.min(minY, textObj.y);
+                    maxX = Math.max(maxX, textObj.x + textObj.width);
+                    maxY = Math.max(maxY, textObj.y + textObj.height);
+                });
+                
+                const padding = 20;
+                tempCanvas.width = (maxX - minX + padding * 2) * scale;
+                tempCanvas.height = (maxY - minY + padding * 2) * scale;
+                
+                textObjects.forEach(textObj => {
+                    if (!textObj.text.trim()) return;
+                    
+                    const textLines = textObj.text.split('\n');
+                    let originalFontSize = (textObj.fontSize / 100) * (canvas.width * 0.5);
+                    ctx.font = `${originalFontSize}px ${textObj.font}`;
+                    let maxTextWidth = 0;
+                    textLines.forEach(line => maxTextWidth = Math.max(maxTextWidth, ctx.measureText(line).width));
+                    if (maxTextWidth > canvas.width * 0.95) originalFontSize *= (canvas.width * 0.95) / maxTextWidth;
+                    
+                    const finalFontSize = originalFontSize * scale;
+                    const finalLineHeight = finalFontSize * 1.5;
+                    tempCtx.font = `${finalFontSize}px ${textObj.font}`;
+                    tempCtx.textAlign = "center";
+                    tempCtx.textBaseline = "middle";
+                    
+                    const finalX = ((textObj.x - minX + padding) + textObj.width / 2) * scale;
+                    let finalY = (((textObj.y - minY + padding) + textObj.height / 2) - (((textLines.length - 1) * originalFontSize * 1.5) / 2)) * scale;
+                    
+                    tempCtx.shadowColor = `rgba(0,0,0,0.5)`;
+                    tempCtx.shadowBlur = textObj.shadowBlur * scale;
+                    tempCtx.strokeStyle = `rgb(0,0,0)`;
+                    tempCtx.lineWidth = textObj.strokeWidth * scale;
+                    tempCtx.lineJoin = 'round';
+                    
+                    textLines.forEach(line => {
+                        if (textObj.strokeWidth > 0) tempCtx.strokeText(line, finalX, finalY);
+                        if (textObj.glowBlur > 0) {
+                            tempCtx.shadowColor = textObj.color;
+                            tempCtx.shadowBlur = textObj.glowBlur * scale;
+                        }
+                        tempCtx.fillStyle = textObj.color;
+                        tempCtx.globalAlpha = textObj.opacity;
+                        tempCtx.fillText(line, finalX, finalY);
+                        tempCtx.shadowBlur = textObj.shadowBlur * scale;
+                        tempCtx.shadowColor = `rgba(0,0,0,0.5)`;
+                        finalY += finalLineHeight;
+                    });
+                });
+                
                 const blob = await new Promise(resolve => tempCanvas.toBlob(resolve, 'image/png'));
-                await navigator.clipboard.write([ new ClipboardItem({ 'image/png': blob }) ]);
+                await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
                 showAlert(translations[currentLang].stickerSuccess);
             } catch (error) {
                 console.error('Failed to copy image:', error);
@@ -1456,9 +2249,8 @@
         copyPngBtn.addEventListener('click', (e) => { e.preventDefault(); copyAsSticker(); });
 
         // Initialize
-        updateTextColor();
         drawCanvas(); // Initial draw for placeholder
-        window.addEventListener('resize', () => { drawCanvas(); if(editFrame.style.opacity === '1') showEditFrame(); });
+        window.addEventListener('resize', () => { drawCanvas(); });
 
     </script>
 </body>
