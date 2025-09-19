@@ -1,0 +1,1465 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>DACO</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.fontcdn.ir/Font/Persian/Shabnam/Shabnam.css" rel="stylesheet">
+    <style>
+        :root {
+            /* Light Theme Colors */
+            --green-main: #1b3b14;
+            --green-dark: #152e11;
+            --orange-main: #ff6e41;
+            --orange-dark: #c55633;
+            --text-color-light: #2c3e50;
+            --bg-color-light: #fff3e3;
+            --panel-bg-light: rgba(255, 255, 255, 0.9);
+            --border-color-light: #d4d9cc;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --icon-color-light: #2c3e50;
+        }
+
+        .night-mode {
+            /* Dark Theme Colors */
+            --green-main: #1b3b14;
+            --green-dark: #152e11;
+            --orange-main: #FF8C00;
+            --orange-dark: #cc7000;
+            --text-color-light: #f5e6d3;
+            --bg-color-light: #1b3b14;
+            --panel-bg-light: rgba(27, 59, 20, 0.95);
+            --border-color-light: #2a4a1f;
+            --shadow-color: rgba(255, 255, 255, 0.1);
+            --icon-color-light: #f5e6d3;
+        }
+        
+        .night-mode #appTitle,
+        .night-mode .subtitle {
+            color: #f5e6d3;
+        }
+
+        /* General Styles & Layout */
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            direction: rtl;
+            background: var(--bg-color-light);
+            color: var(--text-color-light);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            transition: background 0.5s ease, color 0.5s ease;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden; /* Prevent body scroll */
+            padding-top: 70px; /* Space for fixed header */
+            padding-bottom: 80px; /* Space for fixed footer */
+        }
+
+        /* Header Styles */
+        .header {
+            background: var(--panel-bg-light);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color-light);
+            padding: 8px 16px; /* Reduced padding */
+            box-shadow: 0 2px 10px var(--shadow-color);
+            transition: background 0.5s ease, border 0.5s ease;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 2000;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 4px; /* Reduced gap */
+        }
+
+        .app-title-section {
+            text-align: center;
+            flex-grow: 1;
+        }
+
+        #appTitle {
+            font-size: 1.3rem;
+            font-weight: 800;
+            margin: 0;
+            color: #1b3b14;
+        }
+        
+        .subtitle {
+            margin: 0;
+            color: #1b3b14;
+            font-size: 0.7rem;
+            opacity: 0.8;
+        }
+
+        /* Theme & Language Toggles */
+        .toggle-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.5rem;
+            color: var(--icon-color-light);
+            transition: color 0.3s ease;
+            padding: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .toggle-btn svg {
+            width: 24px;
+            height: 24px;
+            stroke: var(--icon-color-light);
+            fill: none;
+            transition: stroke 0.3s ease;
+        }
+        
+        .night-mode .sun-icon { display: none; }
+        .night-mode .moon-icon { display: block; }
+        .sun-icon { display: block; }
+        .moon-icon { display: none; }
+
+        .lang-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 28px;
+        }
+        
+        .lang-switch input { opacity: 0; width: 0; height: 0; }
+
+        .lang-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--border-color-light);
+            transition: .4s;
+            border-radius: 28px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 6px;
+            color: var(--text-color-light);
+            font-size: 0.8rem;
+        }
+        
+        .lang-slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 4px;
+            bottom: 4px;
+            background-color: var(--orange-main);
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .lang-slider:before {
+            transform: translateX(18px);
+            background-color: var(--green-main);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Canvas Container - Mobile Optimized */
+        .canvas-container {
+            flex: 1;
+            position: relative; /* New: For positioning the wrapper */
+            overflow: hidden; /* New: To contain the movable wrapper */
+            min-height: 0;
+            touch-action: none; /* Prevent browser gestures like pull-to-refresh */
+        }
+
+        .canvas-wrapper {
+            position: absolute; /* New: For movability */
+            top: 50%; /* New: Initial centering */
+            left: 50%; /* New: Initial centering */
+            transform: translate(-50%, -50%); /* New: Initial centering */
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            border: 1px solid var(--border-color-light);
+            overflow: hidden;
+            touch-action: none;
+            cursor: grab;
+        }
+
+        .canvas-wrapper:active {
+            cursor: grabbing;
+        }
+        
+        /* New: Big Plus Icon Placeholder */
+        #photo-placeholder {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 100px;
+            color: var(--border-color-light);
+            background-color: rgba(0,0,0,0.02);
+            cursor: pointer;
+            z-index: 10;
+            transition: opacity 0.3s;
+        }
+        
+        /* New: Edit Frame for Text */
+        #edit-frame {
+            position: absolute;
+            top: 0;
+            left: 0;
+            border: 2px dashed var(--orange-main);
+            border-radius: 5px;
+            pointer-events: none; /* Allows clicks to pass through to the canvas */
+            z-index: 5;
+            opacity: 0;
+            transition: opacity 0.4s ease-out;
+        }
+
+
+        canvas {
+            display: block;
+            max-width: 90vw;
+            max-height: 70vh;
+            width: auto;
+            height: auto;
+            touch-action: none;
+        }
+
+        /* Footer with Accordion Controls */
+        .footer-controls {
+            background: var(--panel-bg-light);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid var(--border-color-light);
+            padding: 12px 16px;
+            transition: border 0.5s ease;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 2000;
+        }
+
+        .control-icons {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .control-icon {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            background: none;
+            border: none;
+            color: var(--text-color-light);
+            min-width: 60px;
+        }
+
+        .control-icon:hover, .control-icon.active {
+            background: var(--orange-main);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .control-icon svg {
+            width: 24px;
+            height: 24px;
+            margin-bottom: 4px;
+        }
+
+        .control-icon span {
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        /* Accordion Panels */
+        .accordion-panel {
+            position: fixed;
+            bottom: 80px;
+            left: 0;
+            right: 0;
+            background: var(--panel-bg-light);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid var(--border-color-light);
+            box-shadow: 0 -4px 20px var(--shadow-color);
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+            max-height: calc(100vh - 160px);
+            overflow-y: auto;
+        }
+
+        .accordion-panel.active { transform: translateY(0); }
+        
+        /* New: Styles for Download Panel content */
+        .download-options a {
+            display: block;
+            padding: 14px 20px;
+            background: var(--bg-color-light);
+            margin-bottom: 10px;
+            border-radius: 12px;
+            text-decoration: none;
+            color: var(--text-color-light);
+            font-weight: 600;
+            text-align: center;
+            border: 2px solid var(--border-color-light);
+            transition: all 0.2s ease;
+        }
+        .download-options a:hover {
+            background: var(--orange-main);
+            color: white;
+            border-color: var(--orange-dark);
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            border-bottom: 1px solid var(--border-color-light);
+            font-weight: 700;
+            font-size: 1.1rem;
+            position: sticky;
+            top: 0;
+            background: var(--panel-bg-light);
+            backdrop-filter: blur(10px);
+            z-index: 10;
+        }
+
+        .close-panel {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-color-light);
+            padding: 4px;
+        }
+
+        .panel-content {
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        /* Color Picker Styles */
+        .color-presets {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 16px;
+            align-items: center;
+        }
+        
+        .color-swatch {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .color-swatch:hover {
+            transform: scale(1.1);
+        }
+
+        .color-swatch.active {
+            border-color: var(--orange-main);
+            transform: scale(1.1);
+        }
+
+        .rgb-wheel-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .rgb-trigger {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 2px solid var(--border-color-light);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            color: var(--text-color-light);
+            background: linear-gradient(45deg, red, yellow, lime, cyan, blue, magenta, red);
+            transition: transform 0.2s;
+        }
+
+        .rgb-trigger:hover {
+            transform: scale(1.1);
+        }
+
+        .rgb-wheel {
+            position: absolute;
+            top: 45px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--panel-bg-light);
+            border: 1px solid var(--border-color-light);
+            border-radius: 8px;
+            padding: 10px;
+            box-shadow: 0 4px 15px var(--shadow-color);
+            z-index: 100;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+
+        .rgb-wheel.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .rgb-wheel input[type="color"] {
+            width: 60px;
+            height: 60px;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        /* Input & Button Styles */
+        input[type="file"] { display: none; }
+        
+        textarea, input[type="number"], select, button {
+            padding: 12px 16px;
+            border-radius: 12px;
+            border: 2px solid var(--border-color-light);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            outline: none;
+            font-family: inherit;
+            background-color: var(--panel-bg-light);
+            color: var(--text-color-light);
+        }
+
+        textarea { resize: none; min-height: 80px; }
+        textarea:focus, input:focus, select:focus {
+            border-color: var(--orange-main);
+            box-shadow: 0 0 0 3px rgba(255, 140, 0, 0.2);
+        }
+
+        .font-add-group { display: flex; align-items: center; gap: 8px; }
+
+        .add-font-btn {
+            background: var(--orange-main);
+            color: white;
+            border: none;
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 1.5rem;
+            line-height: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+        }
+        .add-font-btn:hover { background: var(--orange-dark); }
+        .slider-group { display: flex; align-items: center; gap: 12px; }
+        .slider-group label {
+            min-width: 80px;
+            text-align: right;
+            font-size: 0.9rem;
+            color: var(--text-color-light);
+            font-weight: 600;
+        }
+        .slider-group input[type="range"] {
+            flex-grow: 1;
+            -webkit-appearance: none;
+            background: var(--border-color-light);
+            height: 6px;
+            border-radius: 3px;
+            border: none;
+        }
+        .slider-group input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            background: var(--orange-main);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+            transition: background-color 0.3s ease;
+        }
+        .slider-value {
+            font-weight: 600;
+            min-width: 40px;
+            text-align: left;
+            font-size: 0.85rem;
+        }
+
+        .color-toggle-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 0;
+        }
+        .color-toggle-label {
+            font-weight: 600;
+            color: var(--text-color-light);
+            font-size: 0.9rem;
+        }
+        .color-toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 28px;
+        }
+        .color-toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .color-toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: var(--border-color-light);
+            transition: .4s;
+            border-radius: 28px;
+        }
+        .color-toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 20px; width: 20px;
+            left: 4px; bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .color-toggle-slider { background-color: var(--green-main); }
+        input:checked + .color-toggle-slider:before {
+            transform: translateX(18px);
+            background-color: black;
+        }
+
+        .backdrop-section {
+            border-top: 1px solid var(--border-color-light);
+            padding-top: 16px;
+            margin-top: 16px;
+        }
+        .backdrop-header {
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--text-color-light);
+        }
+
+        /* Language specific styles */
+        body[data-lang="en"] {
+            direction: ltr;
+        }
+
+        body[data-lang="en"] .header-top {
+            flex-direction: row-reverse;
+        }
+
+        body[data-lang="en"] .slider-group label {
+            text-align: left;
+        }
+
+        body[data-lang="en"] .slider-value {
+            text-align: right;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            #appTitle { font-size: 1.1rem; }
+            .subtitle { font-size: 0.65rem; }
+            canvas { max-height: 60vh; }
+            .control-icon span { display: none; }
+            .control-icons { gap: 8px; }
+            body { padding-top: 60px; padding-bottom: 70px; }
+        }
+
+        @media (max-width: 480px) {
+            .header { padding: 8px 12px; }
+            .footer-controls { padding: 8px 12px; }
+            #appTitle { font-size: 1rem; }
+        }
+    </style>
+</head>
+<body data-lang="fa">
+    <header class="header">
+        <div class="header-top">
+            <div class="header-controls">
+                <input type="file" id="imageInput" accept="image/*">
+            </div>
+            
+            <div class="app-title-section">
+                <h1 id="appTitle">DACO Font</h1>
+                <p class="subtitle" id="appSubtitle">made by @darabiparham</p>
+            </div>
+            
+             <div class="header-controls">
+                <button class="toggle-btn" id="themeToggle">
+                    <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+                    <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                </button>
+                <label class="lang-switch">
+                    <input type="checkbox" id="langToggle">
+                    <span class="lang-slider">
+                        <span id="fa-label">فا</span>
+                        <span id="en-label">En</span>
+                    </span>
+                </label>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="canvas-container">
+            <div class="canvas-wrapper">
+                <label for="imageInput" id="photo-placeholder">+</label>
+                <div id="edit-frame"></div>
+                <canvas id="canvas"></canvas>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer-controls">
+        <div class="control-icons">
+            <button class="control-icon" data-panel="text">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="4 7 4 4 20 4 20 7"></polyline>
+                    <line x1="9" y1="20" x2="15" y2="20"></line>
+                    <line x1="12" y1="4" x2="12" y2="20"></line>
+                </svg>
+                <span data-fa="متن" data-en="Text">متن</span>
+            </button>
+            <button class="control-icon" data-panel="color">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
+                </svg>
+                <span data-fa="رنگ" data-en="Color">رنگ</span>
+            </button>
+            <button class="control-icon" data-panel="effects">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="3"></circle>
+                    <path d="M12 1v6M12 17v6M4.22 4.22l4.24 4.24M15.54 15.54l4.24 4.24M1 12h6M17 12h6M4.22 19.78l4.24-4.24M15.54 8.46l4.24-4.24"></path>
+                </svg>
+                <span data-fa="افکت" data-en="Effects">افکت</span>
+            </button>
+            <button class="control-icon" data-panel="download">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                <span data-fa="دانلود" data-en="Download">دانلود</span>
+            </button>
+        </div>
+    </footer>
+
+    <div id="textPanel" class="accordion-panel">
+        <div class="panel-header">
+            <span data-fa="تنظیمات متن" data-en="Text Settings">تنظیمات متن</span>
+            <button class="close-panel" data-close="text">×</button>
+        </div>
+        <div class="panel-content">
+            <textarea id="textInput" data-fa="متن خودت رو بنویس" data-en="Write your text" placeholder="متن خودت رو بنویس" rows="3"></textarea>
+            <div class="font-add-group">
+                <label for="fontSelector" data-fa="فونت:" data-en="Font:">فونت:</label>
+                <select id="fontSelector">
+                    <option value="Vazirmatn" selected>Vazirmatn</option>
+                    <option value="Shabnam">Shabnam</option>
+                </select>
+                <label for="fontInput" class="add-font-btn">+</label>
+                <input type="file" id="fontInput" accept=".ttf,.otf">
+            </div>
+            <div class="slider-group">
+                <label for="fontSizeSlider" data-fa="سایز فونت:" data-en="Font Size:">سایز فونت:</label>
+                <input type="range" id="fontSizeSlider" min="0" max="100" value="50">
+                <span id="fontSizeValue" class="slider-value">۵۰</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="colorPanel" class="accordion-panel">
+        <div class="panel-header">
+            <span data-fa="تنظیمات رنگ" data-en="Color Settings">تنظیمات رنگ</span>
+            <button class="close-panel" data-close="color">×</button>
+        </div>
+        <div class="panel-content">
+             <div class="color-presets">
+                <button class="color-swatch active" data-color="black" style="background-color: #000000;"></button>
+                <button class="color-swatch" data-color="white" style="background-color: #ffffff; border: 1px solid #ccc;"></button>
+                <button class="color-swatch" data-color="red" style="background-color: #f44336;"></button>
+                <button class="color-swatch" data-color="green" style="background-color: #4CAF50;"></button>
+                <button class="color-swatch" data-color="blue" style="background-color: #2196F3;"></button>
+                <div class="rgb-wheel-container">
+                    <div class="rgb-trigger" id="rgbTrigger">RGB</div>
+                    <div class="rgb-wheel" id="rgbWheel">
+                        <input type="color" id="colorPicker" value="#000000">
+                    </div>
+                </div>
+            </div>
+            <div class="slider-group" id="shadeSliderContainer">
+                <label for="shadeSlider" data-fa="طیف رنگ:" data-en="Color Shade:">طیف رنگ:</label>
+                <input type="range" id="shadeSlider" min="0" max="100" value="0">
+                <span id="shadeValue" class="slider-value">۰</span>
+            </div>
+            <div class="slider-group">
+                <label for="opacitySlider" data-fa="شفافیت متن:" data-en="Text Opacity:">شفافیت متن:</label>
+                <input type="range" id="opacitySlider" min="0" max="100" value="100">
+                <span id="opacityValue" class="slider-value">۱۰۰٪</span>
+            </div>
+            <div class="backdrop-section">
+                <div class="backdrop-header" data-fa="کادر پشت متن" data-en="Text Background">کادر پشت متن</div>
+                <div class="color-toggle-container">
+                    <span class="color-toggle-label" data-fa="رنگ کادر سیاه/سفید" data-en="Black/White Background">رنگ کادر سیاه/سفید</span>
+                    <label class="color-toggle-switch">
+                        <input type="checkbox" id="blackWhiteBackdropToggle">
+                        <span class="color-toggle-slider"></span>
+                    </label>
+                </div>
+                <div class="slider-group">
+                    <label for="backdropOpacitySlider" data-fa="شفافیت کادر:" data-en="Background Opacity:">شفافیت کادر:</label>
+                    <input type="range" id="backdropOpacitySlider" min="0" max="100" value="0">
+                    <span id="backdropOpacityValue" class="slider-value">۰٪</span>
+                </div>
+                <div class="slider-group">
+                    <label for="backdropRadiusSlider" data-fa="گردی گوشه‌ها:" data-en="Corner Radius:">گردی گوشه‌ها:</label>
+                    <input type="range" id="backdropRadiusSlider" min="0" max="100" value="0">
+                    <span id="backdropRadiusValue" class="slider-value">۰</span>
+                </div>
+                <div class="slider-group">
+                    <label for="backdropWidthSlider" data-fa="پهنای کادر:" data-en="Background Width:">پهنای کادر:</label>
+                    <input type="range" id="backdropWidthSlider" min="0" max="100" value="0">
+                    <span id="backdropWidthValue" class="slider-value">۰</span>
+                </div>
+                <div class="slider-group">
+                    <label for="backdropHeightSlider" data-fa="ارتفاع کادر:" data-en="Background Height:">ارتفاع کادر:</label>
+                    <input type="range" id="backdropHeightSlider" min="0" max="100" value="0">
+                    <span id="backdropHeightValue" class="slider-value">۰</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="effectsPanel" class="accordion-panel">
+        <div class="panel-header">
+            <span data-fa="تنظیمات افکت" data-en="Effects Settings">تنظیمات افکت</span>
+            <button class="close-panel" data-close="effects">×</button>
+        </div>
+        <div class="panel-content">
+            <div class="slider-group">
+                <label for="shadowSlider" data-fa="سایه:" data-en="Shadow:">سایه:</label>
+                <input type="range" id="shadowSlider" min="0" max="20" value="0">
+                <span id="shadowValue" class="slider-value">۰</span>
+            </div>
+            <div class="slider-group">
+                <label for="strokeSlider" data-fa="حاشیه:" data-en="Stroke:">حاشیه:</label>
+                <input type="range" id="strokeSlider" min="0" max="10" value="0">
+                <span id="strokeValue" class="slider-value">۰</span>
+            </div>
+            <div class="slider-group">
+                <label for="glowSlider" data-fa="درخشش:" data-en="Glow:">درخشش:</label>
+                <input type="range" id="glowSlider" min="0" max="20" value="0">
+                <span id="glowValue" class="slider-value">۰</span>
+            </div>
+        </div>
+    </div>
+    
+    <div id="downloadPanel" class="accordion-panel">
+        <div class="panel-header">
+            <span data-fa="دانلود یا کپی" data-en="Download or Copy">دانلود یا کپی</span>
+            <button class="close-panel" data-close="download">×</button>
+        </div>
+        <div class="panel-content download-options">
+            <a href="#" id="downloadJpeg" data-fa="دانلود با فرمت Jpeg" data-en="Download as JPEG">دانلود با فرمت Jpeg</a>
+            <a href="#" id="downloadPng" data-fa="دانلود با فرمت Png" data-en="Download as PNG">دانلود با فرمت Png</a>
+            <a href="#" id="downloadPngTransparent" data-fa="دانلود فقط متن (شفاف)" data-en="Download Text Only (Transparent)">دانلود فقط متن (شفاف)</a>
+            <a href="#" id="copyPng" data-fa="کپی استیکر (Png)" data-en="Copy Sticker (PNG)">کپی استیکر (Png)</a>
+        </div>
+    </div>
+
+
+    <script>
+        // DOM Elements
+        const imageInput = document.getElementById('imageInput');
+        const fontInput = document.getElementById('fontInput');
+        const textInput = document.getElementById('textInput');
+        const fontSelector = document.getElementById('fontSelector');
+        const fontSizeSlider = document.getElementById('fontSizeSlider');
+        const fontSizeValue = document.getElementById('fontSizeValue');
+        
+        const colorSwatches = document.querySelectorAll('.color-swatch');
+        const shadeSlider = document.getElementById('shadeSlider');
+        const shadeValue = document.getElementById('shadeValue');
+        const colorPicker = document.getElementById('colorPicker');
+        const rgbTrigger = document.getElementById('rgbTrigger');
+        const rgbWheel = document.getElementById('rgbWheel');
+
+        const opacitySlider = document.getElementById('opacitySlider');
+        const opacityValue = document.getElementById('opacityValue');
+        const shadowSlider = document.getElementById('shadowSlider');
+        const shadowValue = document.getElementById('shadowValue');
+        const strokeSlider = document.getElementById('strokeSlider');
+        const strokeValue = document.getElementById('strokeValue');
+        const glowSlider = document.getElementById('glowSlider');
+        const glowValue = document.getElementById('glowValue');
+        
+        // Download Buttons
+        const downloadJpegBtn = document.getElementById('downloadJpeg');
+        const downloadPngBtn = document.getElementById('downloadPng');
+        const downloadPngTransparentBtn = document.getElementById('downloadPngTransparent');
+        const copyPngBtn = document.getElementById('copyPng');
+
+        const themeToggle = document.getElementById('themeToggle');
+        const langToggle = document.getElementById('langToggle');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const canvasWrapper = document.querySelector('.canvas-wrapper');
+        const photoPlaceholder = document.getElementById('photo-placeholder');
+        const editFrame = document.getElementById('edit-frame');
+
+        const backdropOpacitySlider = document.getElementById('backdropOpacitySlider');
+        const backdropWidthSlider = document.getElementById('backdropWidthSlider');
+        const backdropHeightSlider = document.getElementById('backdropHeightSlider');
+        const backdropRadiusSlider = document.getElementById('backdropRadiusSlider');
+        const backdropOpacityValue = document.getElementById('backdropOpacityValue');
+        const backdropWidthValue = document.getElementById('backdropWidthValue');
+        const backdropHeightValue = document.getElementById('backdropHeightValue');
+        const backdropRadiusValue = document.getElementById('backdropRadiusValue');
+        const blackWhiteBackdropToggle = document.getElementById('blackWhiteBackdropToggle');
+
+        const controlIcons = document.querySelectorAll('.control-icon');
+        const accordionPanels = document.querySelectorAll('.accordion-panel');
+        const closePanelBtns = document.querySelectorAll('.close-panel');
+
+        const translations = {
+            fa: {
+                initialCanvasText: '',
+                alertImage: 'لطفاً ابتدا یک عکس بارگذاری کنید.',
+                alertText: 'لطفاً متنی برای دانلود وارد کنید.',
+                alertFont: 'شما می‌توانید حداکثر ۳ فونت سفارشی اضافه کنید.',
+                alertFontSuccess: (fileName) => `فونت ${fileName} بارگذاری شد!`,
+                alertFontError: (message) => `خطا در بارگذاری فونت: ${message}`,
+                stickerSuccess: 'استیکر به کلیپ‌بورد کپی شد!'
+            },
+            en: {
+                initialCanvasText: '',
+                alertImage: 'Please upload an image first.',
+                alertText: 'Please enter text to download.',
+                alertFont: 'You can add maximum 3 custom fonts.',
+                alertFontSuccess: (fileName) => `Font ${fileName} loaded successfully!`,
+                alertFontError: (message) => `Font loading error: ${message}`,
+                stickerSuccess: 'Sticker copied to clipboard!'
+            }
+        };
+
+        let currentLang = 'fa';
+        const numToFa = (num) => String(num).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
+        const numToEn = (num) => String(num);
+
+        // App State
+        let img = null;
+        let fontSize = 50;
+        let textColor = 'rgb(0,0,0)';
+        let textOpacity = 1;
+        let currentFont = 'Vazirmatn';
+        let customFontsCount = 0;
+        const MAX_CUSTOM_FONTS = 3;
+        let shadowBlur = 0;
+        let strokeWidth = 0;
+        let glowBlur = 0;
+        
+        // Interaction states
+        let isDraggingText = false;
+        let isDraggingCanvas = false;
+        let isPinching = false;
+        let initialPinchDistance = 0;
+        let lastFontSize = 50;
+
+        let selectedTextBox = { x: 0, y: 0, width: 200, height: 60 };
+        let dragStart = { x: 0, y: 0 };
+        let wrapperPos = { x: 0, y: 0 };
+        let editFrameTimeout;
+
+        let backdropColor = 'rgb(0,0,0)';
+        let backdropOpacity = 0;
+        let backdropRadius = 0; 
+        let backdropWidthPercentage = 0;
+        let backdropHeightPercentage = 0;
+        let textMetrics = null;
+        let selectedColorMode = 'black';
+
+        // Language switching function
+        function switchLanguage(lang) {
+            currentLang = lang;
+            document.body.setAttribute('data-lang', lang);
+            document.documentElement.setAttribute('lang', lang);
+            
+            // Update all translatable elements
+            const elements = document.querySelectorAll('[data-fa][data-en]');
+            elements.forEach(el => {
+                if (el.tagName === 'INPUT' && el.type === 'text') {
+                    el.placeholder = el.getAttribute(`data-${lang}`);
+                } else if (el.tagName === 'TEXTAREA') {
+                    el.placeholder = el.getAttribute(`data-${lang}`);
+                } else {
+                    el.textContent = el.getAttribute(`data-${lang}`);
+                }
+            });
+            
+            updateSliderValues();
+        }
+
+        // Dark mode detection
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) document.body.classList.add('night-mode');
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => document.body.classList.toggle('night-mode', event.matches));
+
+        // RGB Color Wheel
+        rgbTrigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            rgbWheel.classList.toggle('active');
+        });
+
+        colorPicker.addEventListener('input', (e) => {
+            textColor = e.target.value;
+            selectedColorMode = 'custom';
+            colorSwatches.forEach(s => s.classList.remove('active'));
+            drawCanvas();
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.rgb-wheel-container')) {
+                rgbWheel.classList.remove('active');
+            }
+        });
+
+        // Language toggle
+        langToggle.addEventListener('change', (e) => {
+            switchLanguage(e.target.checked ? 'en' : 'fa');
+        });
+
+        // Accordion Panel Management
+        function openPanel(panelId) {
+            accordionPanels.forEach(p => p.classList.remove('active'));
+            controlIcons.forEach(i => i.classList.remove('active'));
+            const panel = document.getElementById(panelId + 'Panel');
+            const icon = document.querySelector(`[data-panel="${panelId}"]`);
+            if (panel) panel.classList.add('active');
+            if (icon) icon.classList.add('active');
+        }
+
+        function closePanel(panelId) {
+            const panel = document.getElementById(panelId + 'Panel');
+            const icon = document.querySelector(`[data-panel="${panelId}"]`);
+            if (panel) panel.classList.remove('active');
+            if (icon) icon.classList.remove('active');
+        }
+
+        controlIcons.forEach(icon => {
+            icon.addEventListener('click', () => {
+                const panelId = icon.dataset.panel;
+                icon.classList.contains('active') ? closePanel(panelId) : openPanel(panelId);
+            });
+        });
+        closePanelBtns.forEach(btn => btn.addEventListener('click', () => closePanel(btn.dataset.close)));
+        document.addEventListener('click', (e) => { if (!e.target.closest('.accordion-panel, .control-icon')) { accordionPanels.forEach(p => p.classList.remove('active')); controlIcons.forEach(i => i.classList.remove('active')); } });
+
+        themeToggle.addEventListener('click', () => document.body.classList.toggle('night-mode'));
+
+        // Image upload
+        imageInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) loadImage(file);
+        });
+
+        function loadImage(file) {
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                img = new Image();
+                img.onload = () => {
+                    const maxWidth = Math.min(window.innerWidth * 0.9, 500);
+                    const maxHeight = window.innerHeight * 0.7;
+                    let newWidth = img.width, newHeight = img.height;
+                    const ratio = Math.min(maxWidth / newWidth, maxHeight / newHeight);
+                    newWidth *= ratio;
+                    newHeight *= ratio;
+                    
+                    canvas.width = newWidth;
+                    canvas.height = newHeight;
+                    selectedTextBox.x = (canvas.width - selectedTextBox.width) / 2;
+                    selectedTextBox.y = (canvas.height - selectedTextBox.height) / 2;
+                    photoPlaceholder.style.display = 'none'; // Hide placeholder
+                    drawCanvas();
+                };
+                img.src = ev.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Font upload
+        fontInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file || customFontsCount >= MAX_CUSTOM_FONTS) return showAlert(translations[currentLang].alertFont);
+            
+            const fontName = `CustomFont_${Date.now()}`;
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                const font = new FontFace(fontName, ev.target.result);
+                font.load().then(() => {
+                    document.fonts.add(font);
+                    const option = new Option(file.name.split('.')[0], fontName);
+                    fontSelector.add(option);
+                    customFontsCount++;
+                    fontSelector.value = fontName;
+                    currentFont = fontName;
+                    drawCanvas();
+                    showAlert(translations[currentLang].alertFontSuccess(file.name));
+                }).catch(error => showAlert(translations[currentLang].alertFontError(error.message)));
+            };
+            reader.readAsArrayBuffer(file);
+        });
+        
+        canvas.addEventListener('click', () => { if (!document.querySelector('.accordion-panel.active')) { textInput.focus(); openPanel('text'); } });
+
+        // Custom Alert function
+        function showAlert(message) {
+            const modal = document.createElement('div');
+            modal.style.cssText = 'position:fixed; inset:0; background:rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; z-index:9999;';
+            modal.innerHTML = `<div style="background: var(--panel-bg-light); padding: 24px; border-radius: 12px; box-shadow: 0 10px 30px var(--shadow-color); max-width: 300px; width: 90%; text-align: center; border: 1px solid var(--border-color-light);"><p style="color: var(--text-color-light); margin-bottom: 16px; font-family: inherit;">${message}</p><button onclick="this.parentElement.parentElement.remove()" style="background: var(--orange-main); color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-family: inherit;">${currentLang === 'fa' ? 'باشه' : 'OK'}</button></div>`;
+            document.body.appendChild(modal);
+        }
+        
+        // Event Listeners
+        textInput.addEventListener('input', drawCanvas);
+        fontSelector.addEventListener('change', (e) => { currentFont = e.target.value; drawCanvas(); });
+        fontSizeSlider.addEventListener('input', (e) => { fontSize = parseInt(e.target.value, 10); updateSliderValues(); drawCanvas(); showEditFrame(); });
+        opacitySlider.addEventListener('input', (e) => { textOpacity = parseInt(e.target.value, 10) / 100; updateSliderValues(); drawCanvas(); });
+        shadowSlider.addEventListener('input', (e) => { shadowBlur = parseInt(e.target.value, 10); updateSliderValues(); drawCanvas(); });
+        strokeSlider.addEventListener('input', (e) => { strokeWidth = parseInt(e.target.value, 10); updateSliderValues(); drawCanvas(); });
+        glowSlider.addEventListener('input', (e) => { glowBlur = parseInt(e.target.value, 10); updateSliderValues(); drawCanvas(); });
+        backdropOpacitySlider.addEventListener('input', (e) => { backdropOpacity = parseInt(e.target.value, 10) / 100; updateSliderValues(); drawCanvas(); });
+        backdropRadiusSlider.addEventListener('input', (e) => { backdropRadius = parseInt(e.target.value, 10); updateSliderValues(); drawCanvas(); });
+        backdropWidthSlider.addEventListener('input', (e) => { backdropWidthPercentage = parseInt(e.target.value, 10); updateSliderValues(); drawCanvas(); });
+        backdropHeightSlider.addEventListener('input', (e) => { backdropHeightPercentage = parseInt(e.target.value, 10); updateSliderValues(); drawCanvas(); });
+        blackWhiteBackdropToggle.addEventListener('change', (e) => { backdropColor = e.target.checked ? 'rgb(0,0,0)' : 'rgb(255,255,255)'; drawCanvas(); });
+        
+        colorSwatches.forEach(swatch => {
+            swatch.addEventListener('click', () => {
+                colorSwatches.forEach(s => s.classList.remove('active'));
+                swatch.classList.add('active');
+                selectedColorMode = swatch.dataset.color;
+                if (selectedColorMode === 'black') shadeSlider.value = 0;
+                else if (selectedColorMode === 'white') shadeSlider.value = 100;
+                else shadeSlider.value = 50;
+                updateTextColor();
+            });
+        });
+        shadeSlider.addEventListener('input', updateTextColor);
+
+        function updateTextColor() {
+            const l = shadeSlider.value;
+            let newColor;
+            switch(selectedColorMode) {
+                case 'red': newColor = `hsl(0, 100%, ${l}%)`; break;
+                case 'green': newColor = `hsl(120, 100%, ${l}%)`; break;
+                case 'blue': newColor = `hsl(240, 100%, ${l}%)`; break;
+                default: newColor = `hsl(0, 0%, ${l}%)`; break;
+            }
+            textColor = newColor;
+            updateSliderValues();
+            drawCanvas();
+        }
+
+        function updateSliderValues() {
+            const numFormat = currentLang === 'fa' ? numToFa : numToEn;
+            const percentSymbol = currentLang === 'fa' ? '٪' : '%';
+            
+            fontSizeValue.textContent = numFormat(Math.round(fontSizeSlider.value));
+            shadeValue.textContent = numFormat(shadeSlider.value);
+            opacityValue.textContent = numFormat(opacitySlider.value) + percentSymbol;
+            shadowValue.textContent = numFormat(shadowSlider.value);
+            strokeValue.textContent = numFormat(strokeSlider.value);
+            glowValue.textContent = numFormat(glowSlider.value);
+            backdropOpacityValue.textContent = numFormat(backdropOpacitySlider.value) + percentSymbol;
+            backdropRadiusValue.textContent = numFormat(backdropRadiusSlider.value);
+            backdropWidthValue.textContent = numFormat(backdropWidthSlider.value);
+            backdropHeightValue.textContent = numFormat(backdropHeightSlider.value);
+        }
+        
+        // New: Show and manage the text edit frame
+        function showEditFrame() {
+            clearTimeout(editFrameTimeout);
+            const rect = canvas.getBoundingClientRect();
+            editFrame.style.left = `${(selectedTextBox.x / canvas.width * rect.width)}px`;
+            editFrame.style.top = `${(selectedTextBox.y / canvas.height * rect.height)}px`;
+            editFrame.style.width = `${(selectedTextBox.width / canvas.width * rect.width)}px`;
+            editFrame.style.height = `${(selectedTextBox.height / canvas.height * rect.height)}px`;
+            editFrame.style.opacity = '1';
+            editFrameTimeout = setTimeout(() => { editFrame.style.opacity = '0'; }, 2000);
+        }
+
+        function drawCanvas() {
+            if (!img && !textInput.value.trim()) {
+                const maxWidth = Math.min(window.innerWidth * 0.9, 400);
+                canvas.width = maxWidth;
+                canvas.height = maxWidth * 0.6;
+                ctx.fillStyle = "#eee";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                photoPlaceholder.style.display = 'flex';
+                return;
+            }
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            if (img) {
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            } else {
+                ctx.fillStyle = "#FFFFFF";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            }
+            
+            const textLines = textInput.value.split('\n');
+            if (textInput.value.trim() === '') return;
+
+            let calculatedFontSize = (fontSize / 100) * (canvas.width * 0.5);
+            ctx.font = `${calculatedFontSize}px ${currentFont}`;
+            let maxTextWidth = 0;
+            textLines.forEach(line => maxTextWidth = Math.max(maxTextWidth, ctx.measureText(line).width));
+            if (maxTextWidth > canvas.width * 0.95) calculatedFontSize *= (canvas.width * 0.95) / maxTextWidth;
+            ctx.font = `${calculatedFontSize}px ${currentFont}`;
+            
+            maxTextWidth = 0;
+            textLines.forEach(line => maxTextWidth = Math.max(maxTextWidth, ctx.measureText(line).width));
+            
+            const lineHeight = calculatedFontSize * 1.5;
+            const backdropPaddingX = (backdropWidthPercentage / 100) * maxTextWidth;
+            const backdropPaddingY = (backdropHeightPercentage / 100) * (lineHeight * textLines.length);
+
+            selectedTextBox.width = maxTextWidth + backdropPaddingX;
+            selectedTextBox.height = (lineHeight * textLines.length) + backdropPaddingY;
+            selectedTextBox.x = Math.max(0, Math.min(selectedTextBox.x, canvas.width - selectedTextBox.width));
+            selectedTextBox.y = Math.max(0, Math.min(selectedTextBox.y, canvas.height - selectedTextBox.height));
+
+            if (backdropOpacity > 0) {
+                ctx.fillStyle = backdropColor;
+                ctx.globalAlpha = backdropOpacity;
+                const r = (backdropRadius / 100) * Math.min(selectedTextBox.width, selectedTextBox.height) / 2; 
+                ctx.beginPath();
+                ctx.moveTo(selectedTextBox.x + r, selectedTextBox.y);
+                ctx.arcTo(selectedTextBox.x + selectedTextBox.width, selectedTextBox.y, selectedTextBox.x + selectedTextBox.width, selectedTextBox.y + selectedTextBox.height, r);
+                ctx.arcTo(selectedTextBox.x + selectedTextBox.width, selectedTextBox.y + selectedTextBox.height, selectedTextBox.x, selectedTextBox.y + selectedTextBox.height, r);
+                ctx.arcTo(selectedTextBox.x, selectedTextBox.y + selectedTextBox.height, selectedTextBox.x, selectedTextBox.y, r);
+                ctx.arcTo(selectedTextBox.x, selectedTextBox.y, selectedTextBox.x + selectedTextBox.width, selectedTextBox.y, r);
+                ctx.closePath();
+                ctx.fill();
+            }
+            
+            ctx.globalAlpha = 1;
+            ctx.font = `${calculatedFontSize}px ${currentFont}`;
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.shadowColor = `rgba(0,0,0,0.5)`;
+            ctx.shadowBlur = shadowBlur;
+            ctx.strokeStyle = `rgb(0,0,0)`;
+            ctx.lineWidth = strokeWidth;
+            ctx.lineJoin = 'round';
+            
+            let lineY = selectedTextBox.y + (selectedTextBox.height / 2) - (((textLines.length - 1) * lineHeight) / 2);
+            textLines.forEach(line => {
+                const x = selectedTextBox.x + selectedTextBox.width / 2;
+                if (strokeWidth > 0) ctx.strokeText(line, x, lineY);
+                if (glowBlur > 0) {
+                    ctx.shadowColor = textColor;
+                    ctx.shadowBlur = glowBlur;
+                }
+                ctx.fillStyle = textColor;
+                ctx.globalAlpha = textOpacity;
+                ctx.fillText(line, x, lineY);
+                ctx.shadowBlur = shadowBlur;
+                ctx.shadowColor = `rgba(0,0,0,0.5)`;
+                lineY += lineHeight;
+            });
+            ctx.globalAlpha = 1;
+            ctx.shadowBlur = 0;
+        }
+
+        // --- Interaction Logic (Mouse and Touch) ---
+        function getPointerPos(e, el) {
+            const rect = el.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            return { x: clientX - rect.left, y: clientY - rect.top };
+        }
+        
+        function getCanvasPos(e) {
+            const rect = canvas.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            return { x: (clientX - rect.left) * (canvas.width / rect.width), y: (clientY - rect.top) * (canvas.height / rect.height) };
+        }
+
+        function handleStart(e) {
+            if (e.touches && e.touches.length === 2) { // Pinch Start
+                e.preventDefault();
+                isPinching = true;
+                const t1 = e.touches[0];
+                const t2 = e.touches[1];
+                initialPinchDistance = Math.hypot(t1.clientX - t2.clientX, t1.clientY - t2.clientY);
+                lastFontSize = fontSize;
+                return;
+            }
+
+            const canvasPos = getCanvasPos(e);
+            if (canvasPos.x >= selectedTextBox.x && canvasPos.x <= selectedTextBox.x + selectedTextBox.width &&
+                canvasPos.y >= selectedTextBox.y && canvasPos.y <= selectedTextBox.y + selectedTextBox.height) {
+                isDraggingText = true;
+                dragStart.x = canvasPos.x - selectedTextBox.x;
+                dragStart.y = canvasPos.y - selectedTextBox.y;
+            } else {
+                isDraggingCanvas = true;
+                const pointerPos = getPointerPos(e, canvasWrapper.parentElement);
+                const rect = canvasWrapper.getBoundingClientRect();
+                dragStart.x = pointerPos.x - rect.left;
+                dragStart.y = pointerPos.y - rect.top;
+            }
+            showEditFrame();
+        }
+
+        function handleMove(e) {
+            if (e.touches && e.touches.length === 2 && isPinching) { // Pinch Move
+                e.preventDefault();
+                const t1 = e.touches[0];
+                const t2 = e.touches[1];
+                const currentDist = Math.hypot(t1.clientX - t2.clientX, t1.clientY - t2.clientY);
+                const scale = currentDist / initialPinchDistance;
+                fontSize = Math.max(0, Math.min(100, lastFontSize * scale));
+                fontSizeSlider.value = fontSize;
+                updateSliderValues();
+                drawCanvas();
+                showEditFrame();
+                return;
+            }
+
+            if (isDraggingText) {
+                const canvasPos = getCanvasPos(e);
+                selectedTextBox.x = Math.max(0, Math.min(canvasPos.x - dragStart.x, canvas.width - selectedTextBox.width));
+                selectedTextBox.y = Math.max(0, Math.min(canvasPos.y - dragStart.y, canvas.height - selectedTextBox.height));
+                drawCanvas();
+                showEditFrame();
+            } else if (isDraggingCanvas) {
+                e.preventDefault();
+                const pointerPos = getPointerPos(e, canvasWrapper.parentElement);
+                canvasWrapper.style.left = `${pointerPos.x - dragStart.x}px`;
+                canvasWrapper.style.top = `${pointerPos.y - dragStart.y}px`;
+                canvasWrapper.style.transform = 'translate(0, 0)'; // Override initial centering
+            }
+        }
+
+        function handleEnd(e) {
+            if (e.touches && e.touches.length > 0) return; // Still fingers on screen
+            isDraggingText = false;
+            isDraggingCanvas = false;
+            isPinching = false;
+        }
+
+        canvasWrapper.addEventListener('mousedown', handleStart);
+        window.addEventListener('mousemove', handleMove);
+        window.addEventListener('mouseup', handleEnd);
+        canvasWrapper.addEventListener('touchstart', handleStart, { passive: false });
+        window.addEventListener('touchmove', handleMove, { passive: false });
+        window.addEventListener('touchend', handleEnd);
+        window.addEventListener('touchcancel', handleEnd);
+        
+        // Download functions
+        function downloadImage(format = 'png') {
+            if (!img && textInput.value.trim() === '') return showAlert(translations[currentLang].alertImage);
+            
+            const link = document.createElement('a');
+            const mimeType = `image/${format}`;
+            link.download = `daco-font-image.${format}`;
+            
+            const tempCanvas = document.createElement('canvas');
+            const tempCtx = tempCanvas.getContext('2d');
+            const scale = img ? img.naturalWidth / canvas.width : 2;
+            
+            tempCanvas.width = canvas.width * scale;
+            tempCanvas.height = canvas.height * scale;
+
+            if (img) tempCtx.drawImage(img, 0, 0, tempCanvas.width, tempCanvas.height);
+            else { tempCtx.fillStyle = "#FFFFFF"; tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height); }
+
+            const textLines = textInput.value.split('\n');
+            if (textInput.value.trim() !== '') {
+                let originalFontSize = (fontSize / 100) * (canvas.width * 0.5);
+                ctx.font = `${originalFontSize}px ${currentFont}`;
+                let maxTextWidth = 0;
+                textLines.forEach(line => maxTextWidth = Math.max(maxTextWidth, ctx.measureText(line).width));
+                if (maxTextWidth > canvas.width * 0.95) originalFontSize *= (canvas.width * 0.95) / maxTextWidth;
+
+                const finalFontSize = originalFontSize * scale;
+                const finalLineHeight = finalFontSize * 1.5;
+                tempCtx.font = `${finalFontSize}px ${currentFont}`;
+                tempCtx.textAlign = "center";
+                tempCtx.textBaseline = "middle";
+
+                const finalX = (selectedTextBox.x + selectedTextBox.width / 2) * scale;
+                let finalY = ((selectedTextBox.y + selectedTextBox.height / 2) - (((textLines.length - 1) * originalFontSize * 1.5) / 2)) * scale;
+
+                if (backdropOpacity > 0) {
+                    const finalBackdropX = selectedTextBox.x * scale;
+                    const finalBackdropY = selectedTextBox.y * scale;
+                    const finalBackdropW = selectedTextBox.width * scale;
+                    const finalBackdropH = selectedTextBox.height * scale;
+                    const r = (backdropRadius / 100) * Math.min(finalBackdropW, finalBackdropH) / 2;
+                    tempCtx.fillStyle = backdropColor; tempCtx.globalAlpha = backdropOpacity; tempCtx.beginPath(); tempCtx.moveTo(finalBackdropX + r, finalBackdropY); tempCtx.arcTo(finalBackdropX + finalBackdropW, finalBackdropY, finalBackdropX + finalBackdropW, finalBackdropY + finalBackdropH, r); tempCtx.arcTo(finalBackdropX + finalBackdropW, finalBackdropY + finalBackdropH, finalBackdropX, finalBackdropY + finalBackdropH, r); tempCtx.arcTo(finalBackdropX, finalBackdropY + finalBackdropH, finalBackdropX, finalBackdropY, r); tempCtx.arcTo(finalBackdropX, finalBackdropY, finalBackdropX + finalBackdropW, finalBackdropY, r); tempCtx.closePath(); tempCtx.fill();
+                }
+
+                tempCtx.globalAlpha = 1; tempCtx.shadowColor = `rgba(0,0,0,0.5)`; tempCtx.shadowBlur = shadowBlur * scale; tempCtx.strokeStyle = `rgb(0,0,0)`; tempCtx.lineWidth = strokeWidth * scale; tempCtx.lineJoin = 'round';
+                
+                textLines.forEach(line => {
+                    if (strokeWidth > 0) tempCtx.strokeText(line, finalX, finalY);
+                    if (glowBlur > 0) { tempCtx.shadowColor = textColor; tempCtx.shadowBlur = glowBlur * scale; }
+                    tempCtx.fillStyle = textColor; tempCtx.globalAlpha = textOpacity; tempCtx.fillText(line, finalX, finalY);
+                    tempCtx.shadowBlur = shadowBlur * scale; tempCtx.shadowColor = `rgba(0,0,0,0.5)`;
+                    finalY += finalLineHeight;
+                });
+            }
+            link.href = tempCanvas.toDataURL(mimeType, 0.9);
+            link.click();
+        }
+
+        function downloadTransparentText() {
+            if (textInput.value.trim() === '') return showAlert(translations[currentLang].alertText);
+            
+            const link = document.createElement('a');
+            link.download = 'daco-text-transparent.png';
+            
+            const tempCanvas = document.createElement('canvas');
+            const tempCtx = tempCanvas.getContext('2d');
+            const scale = 2;
+            
+            let originalFontSize = (fontSize / 100) * (canvas.width * 0.5);
+            ctx.font = `${originalFontSize}px ${currentFont}`;
+            let maxTextWidth = 0;
+            const textLines = textInput.value.split('\n');
+            textLines.forEach(line => maxTextWidth = Math.max(maxTextWidth, ctx.measureText(line).width));
+            if (maxTextWidth > canvas.width * 0.95) originalFontSize *= (canvas.width * 0.95) / maxTextWidth;
+            
+            const textHeight = originalFontSize * 1.5 * textLines.length;
+            const padding = Math.max(strokeWidth, shadowBlur, glowBlur) * 4;
+            tempCanvas.width = (maxTextWidth + padding * 2) * scale;
+            tempCanvas.height = (textHeight + padding * 2) * scale;
+            
+            const finalFontSize = originalFontSize * scale;
+            const finalLineHeight = finalFontSize * 1.5;
+            tempCtx.font = `${finalFontSize}px ${currentFont}`;
+            tempCtx.textAlign = "center";
+            tempCtx.textBaseline = "middle";
+            
+            const finalX = tempCanvas.width / 2;
+            let finalY = (tempCanvas.height / 2) - (((textLines.length - 1) * finalLineHeight) / 2);
+            
+            tempCtx.shadowColor = `rgba(0,0,0,0.5)`;
+            tempCtx.shadowBlur = shadowBlur * scale;
+            tempCtx.strokeStyle = `rgb(0,0,0)`;
+            tempCtx.lineWidth = strokeWidth * scale;
+            tempCtx.lineJoin = 'round';
+            
+            textLines.forEach(line => {
+                if (strokeWidth > 0) tempCtx.strokeText(line, finalX, finalY);
+                if (glowBlur > 0) {
+                    tempCtx.shadowColor = textColor;
+                    tempCtx.shadowBlur = glowBlur * scale;
+                }
+                tempCtx.fillStyle = textColor;
+                tempCtx.globalAlpha = textOpacity;
+                tempCtx.fillText(line, finalX, finalY);
+                tempCtx.shadowBlur = shadowBlur * scale;
+                tempCtx.shadowColor = `rgba(0,0,0,0.5)`;
+                finalY += finalLineHeight;
+            });
+            
+            link.href = tempCanvas.toDataURL('image/png');
+            link.click();
+        }
+
+        async function copyAsSticker() {
+            if (textInput.value.trim() === '') return showAlert(translations[currentLang].alertText);
+            try {
+                 const tempCanvas = document.createElement('canvas');
+                 const tempCtx = tempCanvas.getContext('2d');
+                 const scale = 2;
+                 let originalFontSize = (fontSize / 100) * (canvas.width * 0.5);
+                 ctx.font = `${originalFontSize}px ${currentFont}`;
+                 let maxTextWidth = 0;
+                 const textLines = textInput.value.split('\n');
+                 textLines.forEach(line => maxTextWidth = Math.max(maxTextWidth, ctx.measureText(line).width));
+                 if (maxTextWidth > canvas.width * 0.95) originalFontSize *= (canvas.width * 0.95) / maxTextWidth;
+                 const textHeight = originalFontSize * 1.5 * textLines.length;
+                 const padding = Math.max(strokeWidth, shadowBlur, glowBlur) * 4;
+                 tempCanvas.width = (maxTextWidth + padding * 2) * scale;
+                 tempCanvas.height = (textHeight + padding * 2) * scale;
+                 const finalFontSize = originalFontSize * scale;
+                 const finalLineHeight = finalFontSize * 1.5;
+                 tempCtx.font = `${finalFontSize}px ${currentFont}`; tempCtx.textAlign = "center"; tempCtx.textBaseline = "middle";
+                 const finalX = tempCanvas.width / 2;
+                 let finalY = (tempCanvas.height / 2) - (((textLines.length - 1) * finalLineHeight) / 2);
+                 tempCtx.shadowColor = `rgba(0,0,0,0.5)`; tempCtx.shadowBlur = shadowBlur * scale; tempCtx.strokeStyle = `rgb(0,0,0)`; tempCtx.lineWidth = strokeWidth * scale; tempCtx.lineJoin = 'round';
+                 textLines.forEach(line => {
+                    if (strokeWidth > 0) tempCtx.strokeText(line, finalX, finalY);
+                    if (glowBlur > 0) { tempCtx.shadowColor = textColor; tempCtx.shadowBlur = glowBlur * scale; }
+                    tempCtx.fillStyle = textColor; tempCtx.globalAlpha = textOpacity; tempCtx.fillText(line, finalX, finalY);
+                    tempCtx.shadowBlur = shadowBlur * scale; tempCtx.shadowColor = `rgba(0,0,0,0.5)`;
+                    finalY += finalLineHeight;
+                 });
+                const blob = await new Promise(resolve => tempCanvas.toBlob(resolve, 'image/png'));
+                await navigator.clipboard.write([ new ClipboardItem({ 'image/png': blob }) ]);
+                showAlert(translations[currentLang].stickerSuccess);
+            } catch (error) {
+                console.error('Failed to copy image:', error);
+                showAlert(currentLang === 'fa' ? 'خطا در کپی استیکر.' : 'Error copying sticker.');
+            }
+        }
+
+        downloadPngBtn.addEventListener('click', (e) => { e.preventDefault(); downloadImage('png'); });
+        downloadJpegBtn.addEventListener('click', (e) => { e.preventDefault(); downloadImage('jpeg'); });
+        downloadPngTransparentBtn.addEventListener('click', (e) => { e.preventDefault(); downloadTransparentText(); });
+        copyPngBtn.addEventListener('click', (e) => { e.preventDefault(); copyAsSticker(); });
+
+        // Initialize
+        updateTextColor();
+        drawCanvas(); // Initial draw for placeholder
+        window.addEventListener('resize', () => { drawCanvas(); if(editFrame.style.opacity === '1') showEditFrame(); });
+
+    </script>
+</body>
+</html>
